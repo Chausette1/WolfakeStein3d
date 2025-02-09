@@ -42,7 +42,15 @@ typedef struct s_mlxVar
     void *mlx;
     void *win;
     t_img img;
+    t_map map;
 } t_mlxVar;
+
+typedef struct s_mapType
+{
+    char **map;
+    int length;
+    int width;
+} t_map;
 
 /*
     init functions
@@ -57,10 +65,11 @@ int clean_end(t_mlxVar *data);
 /*
     file_reading functions
 */
+char **load_map(char *filename);
 
 /*
     key_hook functions
 */
 int key_hook(int key, t_mlxVar *data);
 
-#endif
+#endif // WOLFAKASTEIN3D_H
