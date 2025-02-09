@@ -1,6 +1,6 @@
 ##############################
 ### ARGUMENTS
-NAME = cub3d
+NAME = Wolfakestein3D
 CC = gcc
 LIB = MLX_LINUX/libmlx_Linux.a
 C_FLAGS = -Wall -Wextra -Werror -I/usr/include -Iminilibx-linux -O3
@@ -11,7 +11,13 @@ ZLIB = -lz
 
 ##############################
 ### SOURCES
-SRCS = src/main.c
+SRCS =	src/main.c\
+		src/clean/clean.c\
+		src/imagegeneration/imagegeneration.c\
+		src/init/init.c\
+		src/keyhook/keyhook.c\
+		src/readfile/readfile.c\
+
 OBJS = $(SRCS:.c=.o)
 
 
