@@ -6,10 +6,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <X11/keysym.h>
+#include <stdbool.h>
 
-#define WIDTH_WIN 500
-#define HEIHGT_WIN 500
-#define SQUARE_SIZE 100
+#define WIDTH_WIN 900
+#define LENGHT_WIN 1200
+#define SQUARE_SIZE 60
 #define SQUARE_SPEED 10
 #define X_START 200
 #define Y_START 200
@@ -37,20 +38,28 @@ typedef struct s_img
     int endian;
 } t_img;
 
-typedef struct s_mlxVar
-{
-    void *mlx;
-    void *win;
-    t_img img;
-    t_map map;
-} t_mlxVar;
-
 typedef struct s_mapType
 {
     char **map;
     int length;
     int width;
 } t_map;
+
+typedef struct s_player
+{
+    double x;
+    double y;
+} t_player;
+
+typedef struct s_mlxVar
+{
+    void *mlx;
+    void *win;
+    bool is_mini_map;
+    t_img img;
+    t_map map;
+    t_player player;
+} t_mlxVar;
 
 /*
     init functions
@@ -65,11 +74,17 @@ int clean_end(t_mlxVar *data);
 /*
     file_reading functions
 */
-char **load_map(char *filename);
+int load_map(char *filename, t_map *map_struct);
 
 /*
     key_hook functions
 */
 int key_hook(int key, t_mlxVar *data);
+
+/*
+    image_generation functions
+*/
+void generate_frame(t_mlxVar *data);
+void generate_mini_map(t_mlxVar *data);
 
 #endif // WOLFAKASTEIN3D_H

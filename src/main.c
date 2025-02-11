@@ -9,10 +9,14 @@ int main(int argc, char **argv)
         printf("Error\n");
         return 1;
     }
-
-    mlx_data->map.map = load_map(argv[1]);
-
     mlx_data = malloc(sizeof(t_mlxVar));
+
+    if (load_map(argv[1], &mlx_data->map))
+    {
+        printf("Error\n");
+        return 1;
+    }
+
     if (mlx_data == NULL)
     {
         printf("Error\n");

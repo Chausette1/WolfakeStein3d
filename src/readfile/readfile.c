@@ -4,7 +4,7 @@
 
 #define BUFFER_SIZE 100
 
-char **load_map(char *filename)
+int load_map(char *filename, t_map *map_struct)
 {
     FILE *fptr;
     char *line;
@@ -19,7 +19,7 @@ char **load_map(char *filename)
     if (fptr == NULL)
     {
         perror("Error\n");
-        return NULL;
+        return 1;
     }
 
     line = malloc(BUFFER_SIZE * sizeof(char));
@@ -49,9 +49,10 @@ char **load_map(char *filename)
     strcpy(map[line_number - 1], line);
     i = 0;
     line[0] = '\0';
-    line_number++;
 
     fclose(fptr);
-
-    return map;
+    map_struct->map = map;
+    map_struct->length = line_number;
+    map_struct->width = strlen(map[0]);
+    return 0;
 }
