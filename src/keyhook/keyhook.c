@@ -6,6 +6,47 @@ void generate_new_frame(t_mlxVar *data)
     mlx_put_image_to_window(data->mlx, data->win, data->img.img_ptr, 0, 0);
 }
 
+void move_player(t_mlxVar *data, int x, int y)
+{
+    if (data->map.map[(int)data->player.y + y][(int)data->player.x + x] != '1')
+    {
+        data->map.map[(int)data->player.y + y][(int)data->player.x + x] = 'P';
+        data->map.map[(int)data->player.y][(int)data->player.x] = '0';
+        data->player.x += x;
+        data->player.y += y;
+        generate_new_frame(data);
+    }
+}
+
+void move_minimap_vision(t_mlxVar *data, int move)
+{
+    for (int i = 0; i < data->map.length; i++)
+    {
+        for (int j = 0; j < data->map.width; j++)
+        {
+            if (data->map.map[i][j] == 'P')
+            {
+                switch (move)
+                {
+                case 1:
+                    move_player(data, 0, -1); // UP
+                    break;
+                case 2:
+                    move_player(data, -1, 0); // LEFT
+                    break;
+                case 3:
+                    move_player(data, 0, 1); // DOWN
+                    break;
+                case 4:
+                    move_player(data, 1, 0); // RIGHT
+                    break;
+                }
+                return;
+            }
+        }
+    }
+}
+
 int key_hook(int keyCode, t_mlxVar *data)
 {
     enum eKeycodes key = keyCode;
@@ -15,90 +56,30 @@ int key_hook(int keyCode, t_mlxVar *data)
     }
     else if (key == KEY_Z || key == KEY_UP)
     {
-        for (int i = 0; i < data->map.length; i++)
+        if (data->is_mini_map == true)
         {
-            for (int j = 0; j < data->map.width; j++)
-            {
-                if (data->map.map[i][j] == 'P')
-                {
-                    if (i - 1 >= 0)
-                    {
-                        printf("possition joueur update\n");
-                        data->map.map[i - 1][j] = 'P';
-                        data->map.map[i][j] = '0';
-                        data->player.y = i - 1;
-                        printf("New player coordinates: x = %d, y = %d\n", (int)data->player.x, (int)data->player.y);
-                        generate_new_frame(data);
-                        return 0;
-                    }
-                }
-            }
+            move_minimap_vision(data, 1);
         }
     }
     else if (key == KEY_Q || key == KEY_LEFT)
     {
-        for (int i = 0; i < data->map.length; i++)
+        if (data->is_mini_map == true)
         {
-            for (int j = 0; j < data->map.width; j++)
-            {
-                if (data->map.map[i][j] == 'P')
-                {
-                    if (j - 1 >= 0)
-                    {
-                        printf("possition joueur update\n");
-                        data->map.map[i][j - 1] = 'P';
-                        data->map.map[i][j] = '0';
-                        data->player.x = j - 1;
-                        printf("New player coordinates: x = %d, y = %d\n", (int)data->player.x, (int)data->player.y);
-                        generate_new_frame(data);
-                        return 0;
-                    }
-                }
-            }
+            move_minimap_vision(data, 2);
         }
     }
     else if (key == KEY_S || key == KEY_DOWN)
     {
-        for (int i = 0; i < data->map.length; i++)
+        if (data->is_mini_map == true)
         {
-            for (int j = 0; j < data->map.width; j++)
-            {
-                if (data->map.map[i][j] == 'P')
-                {
-                    if (i + 1 < data->map.length)
-                    {
-                        printf("possition joueur update\n");
-                        data->map.map[i + 1][j] = 'P';
-                        data->map.map[i][j] = '0';
-                        data->player.y = i + 1;
-                        printf("New player coordinates: x = %d, y = %d\n", (int)data->player.x, (int)data->player.y);
-                        generate_new_frame(data);
-                        return 0;
-                    }
-                }
-            }
+            move_minimap_vision(data, 3);
         }
     }
     else if (key == KEY_D || key == KEY_RIGHT)
     {
-        for (int i = 0; i < data->map.length; i++)
+        if (data->is_mini_map == true)
         {
-            for (int j = 0; j < data->map.width; j++)
-            {
-                if (data->map.map[i][j] == 'P')
-                {
-                    if (j + 1 < data->map.width)
-                    {
-                        printf("possition joueur update\n");
-                        data->map.map[i][j + 1] = 'P';
-                        data->map.map[i][j] = '0';
-                        data->player.x = j + 1;
-                        printf("New player coordinates: x = %d, y = %d\n", (int)data->player.x, (int)data->player.y);
-                        generate_new_frame(data);
-                        return 0;
-                    }
-                }
-            }
+            move_minimap_vision(data, 4);
         }
     }
     else if (key == KEY_TAB)

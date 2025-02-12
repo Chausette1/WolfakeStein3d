@@ -44,6 +44,7 @@ void init_game(t_mlxVar *data)
     data->img.img_ptr = mlx_new_image(data->mlx, LENGHT_WIN, WIDTH_WIN);
     data->img.addr = mlx_get_data_addr(data->img.img_ptr, &data->img.bits_per_pixel, &data->img.line_length, &data->img.endian);
 
+    data->is_mini_map = true;
     generate_player(data);
     generate_mini_map(data);
 
