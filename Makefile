@@ -17,6 +17,7 @@ SRCS =	src/main.c\
 		src/init/init.c\
 		src/keyhook/keyhook.c\
 		src/readfile/readfile.c\
+		src/bresenhamalgo/bresenhamalgo.c\
 
 OBJS = $(SRCS:.c=.o)
 

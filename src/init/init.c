@@ -7,15 +7,43 @@ void generate_player(t_mlxVar *data)
 
     x = 0;
     y = 0;
+
+    data->player.fov = (PI / 180) * 70; // 70 degrees
+    data->player.scale = 0.4;
+    data->player.rotation_angle = (PI / 18); // 10 degrees
     while (y < data->map.length)
     {
         while (x < data->map.width)
         {
-            if (data->map.map[y][x] == 'N' || data->map.map[y][x] == 'S' || data->map.map[y][x] == 'E' || data->map.map[y][x] == 'W')
+            char buffer = data->map.map[y][x];
+            if (buffer == 'N' || buffer == 'S' || buffer == 'E' || buffer == 'W')
             {
-                data->player.x = x;
-                data->player.y = y;
-                data->map.map[y][x] = 'P';
+                data->player.x = x * SQUARE_SIZE + SQUARE_SIZE / 2;
+                data->player.y = y * SQUARE_SIZE + SQUARE_SIZE / 2;
+                switch (buffer)
+                {
+                case 'N':
+                    data->player.fov_center = PI / 2;
+                    data->player.fov_center_x = data->player.x - 10;
+                    data->player.fov_center_y = data->player.y;
+                    break;
+                case 'S':
+                    data->player.fov_center = 3 * PI / 2;
+                    data->player.fov_center_x = data->player.x + 10;
+                    data->player.fov_center_y = data->player.y;
+                    break;
+                case 'E':
+                    data->player.fov_center = PI;
+                    data->player.fov_center_x = data->player.x;
+                    data->player.fov_center_y = data->player.y - 10;
+                    break;
+                case 'W':
+                    data->player.fov_center = 0;
+                    data->player.fov_center_x = data->player.x;
+                    data->player.fov_center_y = data->player.y + 10;
+                    break;
+                }
+                data->map.map[y][x] = '0';
                 return;
             }
             x++;

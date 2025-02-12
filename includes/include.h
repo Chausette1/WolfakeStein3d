@@ -7,13 +7,13 @@
 #include <stdio.h>
 #include <X11/keysym.h>
 #include <stdbool.h>
+#include <math.h>
 
 #define WIDTH_WIN 900
 #define LENGHT_WIN 1200
 #define SQUARE_SIZE 60
-#define SQUARE_SPEED 10
-#define X_START 200
-#define Y_START 200
+#define STEP 10
+#define PI 3.14159265358979323846
 
 enum eKeycodes
 {
@@ -49,6 +49,12 @@ typedef struct s_player
 {
     double x;
     double y;
+    double scale;
+    double fov;
+    double rotation_angle;
+    double fov_center;
+    double fov_center_x;
+    double fov_center_y;
 } t_player;
 
 typedef struct s_mlxVar
@@ -87,4 +93,9 @@ int key_hook(int key, t_mlxVar *data);
 void generate_frame(t_mlxVar *data);
 void generate_mini_map(t_mlxVar *data);
 
-#endif // WOLFAKASTEIN3D_H
+/*
+    math functions
+*/
+int **bresenham_algo(int x0, int y0, int x1, int y1);
+
+#endif

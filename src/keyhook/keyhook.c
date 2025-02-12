@@ -6,45 +6,31 @@ void generate_new_frame(t_mlxVar *data)
     mlx_put_image_to_window(data->mlx, data->win, data->img.img_ptr, 0, 0);
 }
 
-void move_player(t_mlxVar *data, int x, int y)
+void move_player(t_mlxVar *data, int move)
 {
-    if (data->map.map[(int)data->player.y + y][(int)data->player.x + x] != '1')
+    if (move == 1) // UP
     {
-        data->map.map[(int)data->player.y + y][(int)data->player.x + x] = 'P';
-        data->map.map[(int)data->player.y][(int)data->player.x] = '0';
-        data->player.x += x;
-        data->player.y += y;
-        generate_new_frame(data);
+        data->player.y -= sin(data->player.fov_center) * STEP;
+        data->player.x -= cos(data->player.fov_center) * STEP;
     }
-}
-
-void move_minimap_vision(t_mlxVar *data, int move)
-{
-    for (int i = 0; i < data->map.length; i++)
+    else if (move == 2) // DOWN
     {
-        for (int j = 0; j < data->map.width; j++)
-        {
-            if (data->map.map[i][j] == 'P')
-            {
-                switch (move)
-                {
-                case 1:
-                    move_player(data, 0, -1); // UP
-                    break;
-                case 2:
-                    move_player(data, -1, 0); // LEFT
-                    break;
-                case 3:
-                    move_player(data, 0, 1); // DOWN
-                    break;
-                case 4:
-                    move_player(data, 1, 0); // RIGHT
-                    break;
-                }
-                return;
-            }
-        }
+        data->player.x += cos(data->player.fov_center) * STEP;
+        data->player.y += sin(data->player.fov_center) * STEP;
     }
+    else if (move == 3) // LEFT
+    {
+        data->player.fov_center -= data->player.rotation_angle;
+        data->player.fov_center_x = data->player.x - cos(data->player.fov_center) * STEP;
+        data->player.fov_center_y = data->player.y - sin(data->player.fov_center) * STEP;
+    }
+    else if (move == 4) // RIGHT
+    {
+        data->player.fov_center += data->player.rotation_angle;
+        data->player.fov_center_x = data->player.x + cos(data->player.fov_center) * STEP;
+        data->player.fov_center_y = data->player.y + sin(data->player.fov_center) * STEP;
+    }
+    generate_new_frame(data);
 }
 
 int key_hook(int keyCode, t_mlxVar *data)
@@ -56,35 +42,27 @@ int key_hook(int keyCode, t_mlxVar *data)
     }
     else if (key == KEY_Z || key == KEY_UP)
     {
-        if (data->is_mini_map == true)
-        {
-            move_minimap_vision(data, 1);
-        }
+        move_player(data, 1);
     }
     else if (key == KEY_Q || key == KEY_LEFT)
     {
-        if (data->is_mini_map == true)
-        {
-            move_minimap_vision(data, 2);
-        }
+        move_player(data, 3);
     }
     else if (key == KEY_S || key == KEY_DOWN)
     {
-        if (data->is_mini_map == true)
-        {
-            move_minimap_vision(data, 3);
-        }
+        move_player(data, 2);
     }
     else if (key == KEY_D || key == KEY_RIGHT)
     {
-        if (data->is_mini_map == true)
-        {
-            move_minimap_vision(data, 4);
-        }
+        move_player(data, 4);
     }
     else if (key == KEY_TAB)
     {
-        (void)key;
+        if (data->is_mini_map)
+            data->is_mini_map = false;
+        else
+            data->is_mini_map = true;
+        printf("is_mini_map: %d\n", data->is_mini_map);
     }
     return 0;
 }
