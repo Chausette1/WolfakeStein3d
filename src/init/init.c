@@ -10,7 +10,7 @@ void generate_player(t_mlxVar *data)
 
     data->player.fov = (PI / 180) * 70; // 70 degrees
     data->player.scale = 0.4;
-    data->player.rotation_angle = (PI / 18); // 10 degrees
+    data->player.rotation_angle = (PI / 12); // 15 degrees
     while (y < data->map.length)
     {
         while (x < data->map.width)
@@ -24,25 +24,26 @@ void generate_player(t_mlxVar *data)
                 {
                 case 'N':
                     data->player.fov_center = PI / 2;
-                    data->player.fov_center_x = data->player.x - 10;
-                    data->player.fov_center_y = data->player.y;
+                    data->player.fov_center_x = data->player.x;
+                    data->player.fov_center_y = data->player.y - (10 * STEP);
                     break;
                 case 'S':
                     data->player.fov_center = 3 * PI / 2;
-                    data->player.fov_center_x = data->player.x + 10;
-                    data->player.fov_center_y = data->player.y;
+                    data->player.fov_center_x = data->player.x;
+                    data->player.fov_center_y = data->player.y + (10 * STEP);
                     break;
                 case 'E':
-                    data->player.fov_center = PI;
-                    data->player.fov_center_x = data->player.x;
-                    data->player.fov_center_y = data->player.y - 10;
+                    data->player.fov_center = 0;
+                    data->player.fov_center_x = data->player.x + (10 * STEP);
+                    data->player.fov_center_y = data->player.y;
                     break;
                 case 'W':
-                    data->player.fov_center = 0;
-                    data->player.fov_center_x = data->player.x;
-                    data->player.fov_center_y = data->player.y + 10;
+                    data->player.fov_center = PI;
+                    data->player.fov_center_x = data->player.x - (10 * STEP);
+                    data->player.fov_center_y = data->player.y;
                     break;
                 }
+                printf("Player fov_center_x: %f, fov_center_y: %f, angle : %f\n", data->player.fov_center_x, data->player.fov_center_y, data->player.fov_center);
                 data->map.map[y][x] = '0';
                 return;
             }
