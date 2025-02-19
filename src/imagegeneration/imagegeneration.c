@@ -42,8 +42,6 @@ void translate_coordinates(int *x, int *y, double angle)
     negative_top_angle = (angle <= -2 * PI && angle >= -PI);
     negative_left_angle = (angle <= -PI / 2 && angle >= -3 * PI / 2);
 
-    // printf("angle : %f\n", angle / PI * 180);
-
     if (top_angle || negative_top_angle)
     {
         // printf("je suis un angle entre 0 et 180\n");

@@ -93,7 +93,6 @@ int key_hook(int keyCode, t_mlxVar *data)
             data->is_mini_map = false;
         else
             data->is_mini_map = true;
-        printf("is_mini_map: %d\n", data->is_mini_map);
     }
     return 0;
 }

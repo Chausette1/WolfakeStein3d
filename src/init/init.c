@@ -43,7 +43,6 @@ void generate_player(t_mlxVar *data)
                     data->player.fov_center_y = data->player.y;
                     break;
                 }
-                printf("Player fov_center_x: %f, fov_center_y: %f, angle : %f\n", data->player.fov_center_x, data->player.fov_center_y, data->player.fov_center);
                 data->map.map[y][x] = '0';
                 return;
             }

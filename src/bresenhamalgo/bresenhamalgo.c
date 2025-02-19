@@ -117,22 +117,27 @@ int **dxdy(int x0, int y0, int x1, int y1)
 
     d_factor = (2 * delta_y) - delta_x; // init the first d factor
     point_coordinates[0][0] = x0;       // set the values of the first point of x
-    point_coordinates[1][0] = y0;       // set the values of the first point of x
-
+    point_coordinates[1][0] = y0;       // set the values of the first point of y
+    printf("point 0 x : %d, y : %d\n", x0, y0);
+    printf("point 1 x : %d, y : %d\n", x1, y1);
     for (int i = 1; i < abs(delta_x); i++)
     {
         point_coordinates[0][i] = i + x0;
         if (d_factor > 0)
         {
             point_coordinates[1][i] = point_coordinates[1][i - 1] + yi;
-            d_factor = d_factor + 2 * (delta_y - delta_x);
+            d_factor = d_factor + (2 * (abs(delta_y) - abs(delta_x)));
         }
         else
         {
             point_coordinates[1][i] = point_coordinates[1][i - 1];
-            d_factor = d_factor + 2 * delta_y;
+            d_factor = d_factor + (2 * abs(delta_y));
         }
+        printf("d_factor : %d\n", d_factor);
     }
+
+    printf("delta_x : %d\n", delta_x);
+    printf("delta_y : %d\n", delta_y);
     return (point_coordinates);
 }
 
@@ -161,9 +166,9 @@ int **dydx(int x0, int y0, int x1, int y1)
         delta_x = -delta_x;
     }
 
-    d_factor = 2 * delta_x - delta_y; // init the first d factor
-    point_coordinates[0][0] = x0;     // set the values of the first point of x
-    point_coordinates[1][0] = y0;     // set the values of the first point of x
+    d_factor = (2 * delta_x) - delta_y; // init the first d factor
+    point_coordinates[0][0] = x0;       // set the values of the first point of x
+    point_coordinates[1][0] = y0;       // set the values of the first point of y
 
     for (int i = 1; i < abs(delta_y); i++)
     {
@@ -171,12 +176,12 @@ int **dydx(int x0, int y0, int x1, int y1)
         if (d_factor > 0)
         {
             point_coordinates[0][i] = point_coordinates[0][i - 1] + xi;
-            d_factor = d_factor + 2 * (delta_x - delta_y);
+            d_factor = d_factor + 2 * (abs(delta_x) - abs(delta_y));
         }
         else
         {
             point_coordinates[0][i] = point_coordinates[0][i - 1];
-            d_factor = d_factor + 2 * delta_x;
+            d_factor = d_factor + 2 * abs(delta_x);
         }
     }
     return (point_coordinates);
