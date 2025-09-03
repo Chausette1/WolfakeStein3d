@@ -6,8 +6,9 @@
 void update(Player *player);
 void draw(MiniMap *mini_map);
 
-int main(void) {
+static bool mini_map_enabled = true;
 
+int main(void) {
   map_t map;
   if (!map_reader::load_map(map, DEFAULT_MAP)) {
     std::cerr << "Failed to load map: " << DEFAULT_MAP << std::endl;
@@ -23,7 +24,7 @@ int main(void) {
 
   int frame_count = 0;
   while (!WindowShouldClose()) {
-    if (frame_count % 6 == 0) {
+    if (frame_count % ACTION_KEY_DELAY == 0) {
       update(player);
     }
     draw(mini_map);
@@ -37,12 +38,28 @@ int main(void) {
 }
 
 void update(Player *player) {
-  if (IsKeyDown(KEY_A)) {
-    player->rotate(false);
-  } else if (IsKeyDown(KEY_D)) {
-    player->rotate(true);
-  } else if (IsKeyDown(KEY_W)) {
-    player->move();
+  int queue = GetKeyPressed();
+
+  if (queue == 0) {  // nothing in queue we look if key are pressed
+    if (IsKeyDown(KEY_A)) {
+      player->rotate(false);
+    } else if (IsKeyDown(KEY_D)) {
+      player->rotate(true);
+    } else if (IsKeyDown(KEY_W)) {
+      player->move();
+    } else if (IsKeyDown(KEY_TAB)) {
+      mini_map_enabled = !mini_map_enabled;
+    }
+  } else {
+    if (queue == KEY_A) {
+      player->rotate(false);
+    } else if (queue == KEY_D) {
+      player->rotate(true);
+    } else if (queue == KEY_W) {
+      player->move();
+    } else if (queue == KEY_TAB) {
+      mini_map_enabled = !mini_map_enabled;
+    }
   }
 }
 
@@ -51,7 +68,9 @@ void draw(MiniMap *mini_map) {
 
   ClearBackground(BLACK);
 
-  mini_map->draw();
+  if (mini_map_enabled) {
+    mini_map->draw();
+  }
 
   DrawFPS(FPS_INDICATOR_X, FPS_INDICATOR_Y);
   EndDrawing();
