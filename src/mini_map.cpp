@@ -36,17 +36,26 @@ void MiniMap::draw() {
     x_win = 0;
     x = player->get_x() - (SCREEN_WIDTH / 2);
 
-    int tile_y = y / MINI_MAP_TILE_SIZE;
     int offset_y = y % MINI_MAP_TILE_SIZE;
+    while (offset_y > 0 || offset_y < 0) {
+      y--;
+      y_win--;
+      offset_y = y % MINI_MAP_TILE_SIZE;
+    }
+    int tile_y = y / MINI_MAP_TILE_SIZE;
 
     while (x < x_max) {
 
-      int tile_x = x / MINI_MAP_TILE_SIZE;
       int offset_x = x % MINI_MAP_TILE_SIZE;
+      while (offset_x > 0 || offset_x < 0) {
+        x--;
+        x_win--;
+        offset_x = x % MINI_MAP_TILE_SIZE;
+      }
+      int tile_x = x / MINI_MAP_TILE_SIZE;
 
       if (isInMap(tile_x, tile_y)) {
         // print x/y
-        std::cout << "x: " << tile_x << " y: " << tile_y << std::endl;
         switch (map->data[tile_y][tile_x]) {
         case MAP_TILE_EMPTY:
           draw_rectangle(x_win, y_win, BLACK);
@@ -68,27 +77,11 @@ void MiniMap::draw() {
           break;
         }
       }
-      if (offset_x == 0) {
-        x += MINI_MAP_TILE_SIZE;
-        x_win += MINI_MAP_TILE_SIZE;
-      } else {
-        while (offset_x > 0 || offset_x < 0 && x < x_max) {
-          x++;
-          x_win++;
-          offset_x = x % MINI_MAP_TILE_SIZE;
-        }
-      }
+      x += MINI_MAP_TILE_SIZE;
+      x_win += MINI_MAP_TILE_SIZE;
     }
-    if (offset_y == 0) {
-      y += MINI_MAP_TILE_SIZE;
-      y_win += MINI_MAP_TILE_SIZE;
-    } else {
-      while (offset_y > 0 || offset_y < 0 && y < y_max) {
-        y++;
-        y_win++;
-        offset_y = y % MINI_MAP_TILE_SIZE;
-      }
-    }
+    y += MINI_MAP_TILE_SIZE;
+    y_win += MINI_MAP_TILE_SIZE;
   }
 
   player->draw();
