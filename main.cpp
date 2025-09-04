@@ -4,9 +4,11 @@
 #include "./includes/player.hpp"
 
 void update(Player *player);
-void draw(MiniMap *mini_map);
+void draw(MiniMap *mini_map, Player *player);
 
-static bool mini_map_enabled = true;
+static bool mini_map_enabled = false;
+int frame_count = 0;
+int last_time = 0;
 
 int main(void) {
     map_t map;
@@ -24,12 +26,11 @@ int main(void) {
 
     SetTargetFPS(MAX_FPS);
 
-    int frame_count = 0;
     while (!WindowShouldClose()) {
         if (frame_count % ACTION_KEY_DELAY == 0) {
             update(player);
         }
-        draw(mini_map);
+        draw(mini_map, player);
 
         frame_count++;
     }
@@ -49,7 +50,8 @@ void update(Player *player) {
             player->rotate(true);
         } else if (IsKeyDown(KEY_W)) {
             player->move();
-        } else if (IsKeyDown(KEY_TAB)) {
+        } else if (IsKeyDown(KEY_TAB) && last_time + 4 * ACTION_KEY_DELAY < frame_count) {
+            last_time = frame_count;
             mini_map_enabled = !mini_map_enabled;
         }
     } else {
@@ -65,13 +67,15 @@ void update(Player *player) {
     }
 }
 
-void draw(MiniMap *mini_map) {
+void draw(MiniMap *mini_map, Player *player) {
     BeginDrawing();
 
     ClearBackground(BLACK);
 
     if (mini_map_enabled) {
         mini_map->draw();
+    } else {
+        player->draw_vision();
     }
 
     DrawFPS(FPS_INDICATOR_X, FPS_INDICATOR_Y);

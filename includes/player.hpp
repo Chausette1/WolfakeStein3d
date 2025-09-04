@@ -17,6 +17,7 @@ class Player {
     void castRays(); // usable when one ray works
 
     void draw() const;
+    void draw_vision() const;
 
   private:
     Vector2 player_pos;

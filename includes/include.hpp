@@ -23,6 +23,7 @@ constexpr u_int8_t MAX_FPS = 60;
 constexpr int FPS_INDICATOR_X = 10;
 constexpr int FPS_INDICATOR_Y = 10;
 constexpr u_int8_t ACTION_KEY_DELAY = 4; // in frames
+constexpr u_int8_t VISION_SCALE = 10;
 
 /*
     Define all math Constants for the raycaster
@@ -63,7 +64,7 @@ enum class WallSide { horizontal = 0, vertical = 1, none = 2 };
 /*
     Define all player constants for the raycaster
 */
-constexpr int PLAYER_FOV = 70;
+constexpr int PLAYER_FOV = 69;
 constexpr int PLAYER_STEP = 10;
 constexpr float PLAYER_ROT_STEP = 5.0f * (3.14159265358979323846f / 180.0f);
 constexpr int PLAYER_SIZE_ON_MINI_MAP = 8;

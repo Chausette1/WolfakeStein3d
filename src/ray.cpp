@@ -46,12 +46,6 @@ void MyRay::cast(const Player &player, const map_t &map, Vector2 ray_dir) {
         sideDist.y = ((pos.y - map_coord.y) * deltaDist.y);
     }
 
-    // std::cout << "---------------" << std::endl;
-    // std::cout << "player pos: " << pos.x << " " << pos.y << std::endl;
-    // std::cout << "map_coord: " << map_coord.x << " " << map_coord.y << std::endl;
-    // std::cout << "deltaDist: " << deltaDist.x << " " << deltaDist.y << std::endl;
-    // std::cout << "sideDist: " << sideDist.x << " " << sideDist.y << std::endl;
-
     while (!is_cast) {
         if (sideDist.x < sideDist.y) {
             sideDist.x += deltaDist.x;
@@ -62,13 +56,10 @@ void MyRay::cast(const Player &player, const map_t &map, Vector2 ray_dir) {
             map_coord.y += step.y;
             wall_side = WallSide::horizontal;
         }
-        // std::cout << "sideDist: " << sideDist.x << " " << sideDist.y << " map_coord: " << map_coord.x << " "
-        //           << map_coord.y << std::endl;
 
         if (map.data[map_coord.y][map_coord.x] != MapTile::Empty) {
             is_cast = true;
             wall_type = map.data[map_coord.y][map_coord.x];
-            // std::cout << "Hit wall at: " << map_coord.x << " " << map_coord.y << std::endl;
         }
     }
 
@@ -77,7 +68,6 @@ void MyRay::cast(const Player &player, const map_t &map, Vector2 ray_dir) {
     } else {
         distance = (sideDist.y - deltaDist.y);
     }
-    // std::cout << "distance final: " << distance << std::endl;
 }
 
 void MyRay::draw() {
@@ -87,4 +77,47 @@ void MyRay::draw() {
 
     DrawLine(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH / 2 + ray_dir.x * distance,
              SCREEN_HEIGHT / 2 - ray_dir.y * distance, MAGENTA);
+}
+
+void MyRay::draw_line(int line_x) {
+    if (!is_cast) {
+        return;
+    }
+    int line_height = static_cast<int>(SCREEN_HEIGHT / distance);
+    int drawStart = -line_height * VISION_SCALE + SCREEN_HEIGHT / 2;
+    if (drawStart < 0)
+        drawStart = 0;
+    int drawEnd = line_height * VISION_SCALE + SCREEN_HEIGHT / 2;
+    if (drawEnd >= SCREEN_HEIGHT)
+        drawEnd = SCREEN_HEIGHT - 1;
+
+    Color color;
+
+    if (wall_type == MapTile::Wall) {
+        if (wall_side == WallSide::vertical) {
+            color = {126, 0, 0, 255};
+        } else if (wall_side == WallSide::horizontal) {
+            color = {255, 0, 0, 255};
+        }
+    } else if (wall_type == MapTile::Wall2) {
+        if (wall_side == WallSide::vertical) {
+            color = {126, 126, 0, 255};
+        } else if (wall_side == WallSide::horizontal) {
+            color = {255, 255, 0, 255};
+        }
+    } else if (wall_type == MapTile::Wall3) {
+        if (wall_side == WallSide::vertical) {
+            color = {0, 126, 0, 255};
+        } else if (wall_side == WallSide::horizontal) {
+            color = {0, 255, 0, 255};
+        }
+    } else if (wall_type == MapTile::Wall4) {
+        if (wall_side == WallSide::vertical) {
+            color = {126, 0, 126, 255};
+        } else if (wall_side == WallSide::horizontal) {
+            color = {255, 0, 255, 255};
+        }
+    }
+
+    DrawLine(line_x, drawStart, line_x, drawEnd, color);
 }

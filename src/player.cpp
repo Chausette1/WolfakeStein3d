@@ -101,7 +101,7 @@ void Player::rotate(bool right) {
     player_dir = ROTATE_MAT_2D(right ? -PLAYER_ROT_STEP : PLAYER_ROT_STEP, player_dir);
 
     float tan_buff = tan(Deg2Rad(player_fov / 2));
-    player_plane = {player_dir.y * tan_buff, player_dir.x * tan_buff};
+    player_plane = {player_dir.y * tan_buff, -player_dir.x * tan_buff};
     this->castRays();
 }
 
@@ -119,5 +119,11 @@ void Player::castRays() {
         Vector2 ray_dir = {player_dir.x + player_plane.x * camera_x, player_dir.y + player_plane.y * camera_x};
 
         this->rays[i]->cast(*this, *map, ray_dir);
+    }
+}
+
+void Player::draw_vision() const {
+    for (int i = 0; i < SCREEN_WIDTH; i++) {
+        this->rays[i]->draw_line(i);
     }
 }

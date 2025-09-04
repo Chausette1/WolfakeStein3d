@@ -16,4 +16,5 @@ class MyRay {
     ~MyRay();
     void cast(const Player &player, const map_t &map, Vector2 ray_dir = {0, 0});
     void draw();
+    void draw_line(int line_x);
 };
