@@ -83,41 +83,37 @@ void MyRay::draw_line(int line_x) {
     if (!is_cast) {
         return;
     }
-    int line_height = static_cast<int>(SCREEN_HEIGHT / distance);
+    float buffer_distance = this->distance / MINI_MAP_TILE_SIZE; // normalize distance
+
+    float line_height = SCREEN_HEIGHT / buffer_distance;
+
     int drawStart = -line_height * VISION_SCALE + SCREEN_HEIGHT / 2;
     if (drawStart < 0)
         drawStart = 0;
     int drawEnd = line_height * VISION_SCALE + SCREEN_HEIGHT / 2;
     if (drawEnd >= SCREEN_HEIGHT)
         drawEnd = SCREEN_HEIGHT - 1;
-
     Color color;
 
-    if (wall_type == MapTile::Wall) {
-        if (wall_side == WallSide::vertical) {
-            color = {126, 0, 0, 255};
-        } else if (wall_side == WallSide::horizontal) {
-            color = {255, 0, 0, 255};
-        }
-    } else if (wall_type == MapTile::Wall2) {
-        if (wall_side == WallSide::vertical) {
-            color = {126, 126, 0, 255};
-        } else if (wall_side == WallSide::horizontal) {
-            color = {255, 255, 0, 255};
-        }
-    } else if (wall_type == MapTile::Wall3) {
-        if (wall_side == WallSide::vertical) {
-            color = {0, 126, 0, 255};
-        } else if (wall_side == WallSide::horizontal) {
-            color = {0, 255, 0, 255};
-        }
-    } else if (wall_type == MapTile::Wall4) {
-        if (wall_side == WallSide::vertical) {
-            color = {126, 0, 126, 255};
-        } else if (wall_side == WallSide::horizontal) {
-            color = {255, 0, 255, 255};
-        }
+    if (wall_type == MapTile::Wall && wall_side == WallSide::vertical) {
+        color = WALL1_V_COLOR;
+    } else if (wall_type == MapTile::Wall && wall_side == WallSide::horizontal) {
+        color = WALL1_H_COLOR;
+    } else if (wall_type == MapTile::Wall2 && wall_side == WallSide::vertical) {
+        color = WALL2_V_COLOR;
+    } else if (wall_type == MapTile::Wall2 && wall_side == WallSide::horizontal) {
+        color = WALL2_H_COLOR;
+    } else if (wall_type == MapTile::Wall3 && wall_side == WallSide::vertical) {
+        color = WALL3_V_COLOR;
+    } else if (wall_type == MapTile::Wall3 && wall_side == WallSide::horizontal) {
+        color = WALL3_H_COLOR;
+    } else if (wall_type == MapTile::Wall4 && wall_side == WallSide::vertical) {
+        color = WALL4_V_COLOR;
+    } else if (wall_type == MapTile::Wall4 && wall_side == WallSide::horizontal) {
+        color = WALL4_H_COLOR;
     }
 
+    DrawLine(line_x, 0, line_x, drawStart, CEILING_COLOR);
     DrawLine(line_x, drawStart, line_x, drawEnd, color);
+    DrawLine(line_x, drawEnd, line_x, SCREEN_HEIGHT, FLOOR_COLOR);
 }

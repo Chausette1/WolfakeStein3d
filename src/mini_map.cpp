@@ -2,10 +2,7 @@
 
 namespace {
 
-void draw_rectangle(int x, int y, Color color) {
-    DrawRectangle(x, y, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE, color);
-    DrawRectangleLines(x, y, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE, WHITE);
-}
+void draw_rectangle(int x, int y, Color color) { DrawRectangle(x, y, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE, color); }
 } // namespace
 
 MiniMap::MiniMap(Player *player, map_t &map) {

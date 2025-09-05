@@ -22,11 +22,10 @@ constexpr const char *SCREEN_NAME = "Raycaster";
 constexpr u_int8_t MAX_FPS = 60;
 constexpr int FPS_INDICATOR_X = 10;
 constexpr int FPS_INDICATOR_Y = 10;
-constexpr u_int8_t ACTION_KEY_DELAY = 4; // in frames
-constexpr u_int8_t VISION_SCALE = 10;
+inline u_int8_t ACTION_KEY_DELAY = 4; // in frames
 
 /*
-    Define all math Constants for the raycaster
+Define all math Constants for the raycaster
 */
 
 constexpr float MY_PI = 3.14159265358979323846f;
@@ -40,7 +39,18 @@ constexpr Vector2 ROTATE_MAT_2D(float angle, Vector2 vec) {
     Define all constant for the raycaster
 */
 
-constexpr const char *DEFAULT_MAP = "./maps/1.ray";
+constexpr Color FLOOR_COLOR = DARKGRAY;
+constexpr Color CEILING_COLOR = GRAY;
+constexpr Color WALL1_V_COLOR = {126, 0, 0, 255};
+constexpr Color WALL1_H_COLOR = RED;
+constexpr Color WALL2_V_COLOR = {0, 126, 0, 255};
+constexpr Color WALL2_H_COLOR = GREEN;
+constexpr Color WALL3_V_COLOR = {0, 0, 126, 255};
+constexpr Color WALL3_H_COLOR = BLUE;
+constexpr Color WALL4_V_COLOR = {126, 126, 0, 255};
+constexpr Color WALL4_H_COLOR = YELLOW;
+constexpr const char *DEFAULT_MAP = "./maps/7.ray";
+constexpr float VISION_SCALE = 0.5f;
 
 /*
     Define all value for the map

@@ -8,7 +8,7 @@ void draw(MiniMap *mini_map, Player *player);
 
 static bool mini_map_enabled = false;
 int frame_count = 0;
-int last_time = 0;
+bool lock_tab = false;
 
 int main(void) {
     map_t map;
@@ -41,29 +41,26 @@ int main(void) {
 }
 
 void update(Player *player) {
-    int queue = GetKeyPressed();
 
-    if (queue == 0) { // nothing in queue we look if key are pressed
-        if (IsKeyDown(KEY_A)) {
-            player->rotate(false);
-        } else if (IsKeyDown(KEY_D)) {
-            player->rotate(true);
-        } else if (IsKeyDown(KEY_W)) {
-            player->move();
-        } else if (IsKeyDown(KEY_TAB) && last_time + 4 * ACTION_KEY_DELAY < frame_count) {
-            last_time = frame_count;
-            mini_map_enabled = !mini_map_enabled;
-        }
-    } else {
-        if (queue == KEY_A) {
-            player->rotate(false);
-        } else if (queue == KEY_D) {
-            player->rotate(true);
-        } else if (queue == KEY_W) {
-            player->move();
-        } else if (queue == KEY_TAB) {
-            mini_map_enabled = !mini_map_enabled;
-        }
+    if (IsKeyUp(KEY_TAB) && lock_tab) {
+        lock_tab = false;
+    }
+
+    if (IsKeyDown(KEY_A)) {
+        player->rotate(false);
+    } else if (IsKeyDown(KEY_D)) {
+        player->rotate(true);
+    } else if (IsKeyDown(KEY_W)) {
+        player->move();
+    } else if (IsKeyDown(KEY_UP)) {
+        ACTION_KEY_DELAY--;
+    } else if (IsKeyDown(KEY_DOWN)) {
+        ACTION_KEY_DELAY++;
+    }
+
+    if (IsKeyDown(KEY_TAB) && !lock_tab) {
+        mini_map_enabled = !mini_map_enabled;
+        lock_tab = true;
     }
 }
 
