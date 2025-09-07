@@ -6,7 +6,8 @@
 class MiniMap {
   public:
     MiniMap(Player *player, map_t &map);
-    ~MiniMap();
+
+    void change_map(map_t &map);
 
     void draw();
 

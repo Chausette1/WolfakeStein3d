@@ -1,26 +1,29 @@
 #include "ray.hpp"
 
 #include "player.hpp"
+#include "texture.hpp"
 
-MyRay::MyRay() {
+MyRay::MyRay()
+{
     distance = 0.0f;
     wall_side = WallSide::none;
     wall_type = MapTile::Empty;
     is_cast = false;
 }
 
-MyRay::~MyRay() { delete this; }
-
-void MyRay::cast(const Player &player, const map_t &map, Vector2 ray_dir) {
+void
+MyRay::cast(const Player& player, const map_t& map, Vector2 ray_dir)
+{
     is_cast = false;
 
     this->ray_dir = ray_dir;
 
-    Vector2 pos = {static_cast<float>(player.get_x() / static_cast<float>(MINI_MAP_TILE_SIZE)),
-                   static_cast<float>(player.get_y() / static_cast<float>(MINI_MAP_TILE_SIZE))};
+    Vector2 pos = { (player.get_x() / static_cast<float>(MINI_MAP_TILE_SIZE)),
+                    (player.get_y() / static_cast<float>(MINI_MAP_TILE_SIZE)) };
 
-    Vector2 map_coord = {static_cast<float>(static_cast<int>(player.get_x() / MINI_MAP_TILE_SIZE)),
-                         static_cast<float>(static_cast<int>(player.get_y() / MINI_MAP_TILE_SIZE))};
+    Vector2 map_coord = { static_cast<float>(static_cast<int>(player.get_x() / MINI_MAP_TILE_SIZE)),
+                          static_cast<float>(
+                            static_cast<int>(player.get_y() / MINI_MAP_TILE_SIZE)) };
 
     Vector2 sideDist;
 
@@ -64,28 +67,64 @@ void MyRay::cast(const Player &player, const map_t &map, Vector2 ray_dir) {
     }
 
     if (wall_side == WallSide::vertical) {
-        distance = (sideDist.x - deltaDist.x);
+        distance = (sideDist.x - deltaDist.x) / MINI_MAP_TILE_SIZE;
+        wall_x = pos.y - distance * ray_dir.y;
     } else {
-        distance = (sideDist.y - deltaDist.y);
+        distance = (sideDist.y - deltaDist.y) / MINI_MAP_TILE_SIZE;
+        wall_x = pos.x + distance * ray_dir.x;
+    }
+
+    wall_x -= floor((wall_x));
+
+    tex_x = static_cast<int>(wall_x * TEXTURE_WIDTH);
+
+    if ((wall_side == WallSide::vertical && ray_dir.x > 0) ||
+        (wall_side == WallSide::horizontal && ray_dir.y < 0)) {
+        tex_x = TEXTURE_WIDTH - tex_x - 1;
+    }
+
+    switch (wall_type) {
+        case MapTile::Wall:
+            tex_num = 0;
+            break;
+        case MapTile::Wall2:
+            tex_num = 1;
+            break;
+        case MapTile::Wall3:
+            tex_num = 2;
+            break;
+        case MapTile::Wall4:
+            tex_num = 3;
+            break;
+        default:
+            throw std::runtime_error("Invalid wall type in ray casting");
     }
 }
 
-void MyRay::draw() {
+void
+MyRay::draw()
+{
     if (!is_cast) {
         return;
     }
 
-    DrawLine(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH / 2 + ray_dir.x * distance,
-             SCREEN_HEIGHT / 2 - ray_dir.y * distance, MAGENTA);
+    DrawLine(SCREEN_WIDTH / 2,
+             SCREEN_HEIGHT / 2,
+             SCREEN_WIDTH / 2 + ray_dir.x * distance * MINI_MAP_TILE_SIZE,
+             SCREEN_HEIGHT / 2 - ray_dir.y * distance * MINI_MAP_TILE_SIZE,
+             MAGENTA);
 }
 
-void MyRay::draw_line(int line_x) {
+void
+MyRay::draw_line(int line_x,
+                 std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixels,
+                 TextureManager* texture_manager)
+{
     if (!is_cast) {
         return;
     }
-    float buffer_distance = this->distance / MINI_MAP_TILE_SIZE; // normalize distance
 
-    float line_height = SCREEN_HEIGHT / buffer_distance;
+    float line_height = SCREEN_HEIGHT / distance;
 
     int drawStart = -line_height * VISION_SCALE + SCREEN_HEIGHT / 2;
     if (drawStart < 0)
@@ -93,27 +132,34 @@ void MyRay::draw_line(int line_x) {
     int drawEnd = line_height * VISION_SCALE + SCREEN_HEIGHT / 2;
     if (drawEnd >= SCREEN_HEIGHT)
         drawEnd = SCREEN_HEIGHT - 1;
-    Color color;
 
-    if (wall_type == MapTile::Wall && wall_side == WallSide::vertical) {
-        color = WALL1_V_COLOR;
-    } else if (wall_type == MapTile::Wall && wall_side == WallSide::horizontal) {
-        color = WALL1_H_COLOR;
-    } else if (wall_type == MapTile::Wall2 && wall_side == WallSide::vertical) {
-        color = WALL2_V_COLOR;
-    } else if (wall_type == MapTile::Wall2 && wall_side == WallSide::horizontal) {
-        color = WALL2_H_COLOR;
-    } else if (wall_type == MapTile::Wall3 && wall_side == WallSide::vertical) {
-        color = WALL3_V_COLOR;
-    } else if (wall_type == MapTile::Wall3 && wall_side == WallSide::horizontal) {
-        color = WALL3_H_COLOR;
-    } else if (wall_type == MapTile::Wall4 && wall_side == WallSide::vertical) {
-        color = WALL4_V_COLOR;
-    } else if (wall_type == MapTile::Wall4 && wall_side == WallSide::horizontal) {
-        color = WALL4_H_COLOR;
+    double step = 1.0 * TEXTURE_HEIGHT / line_height;
+
+    double texPos = (drawStart - SCREEN_HEIGHT / 2 + line_height * VISION_SCALE) * step;
+
+    std::vector<u_int32_t> texture = texture_manager->get_texture(tex_num);
+
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        if (y < drawStart) {
+            screenPixels[y * SCREEN_WIDTH + line_x] = CEILING_COLOR;
+        } else if (y >= drawStart && y <= drawEnd) {
+
+            int tex_y = static_cast<int>(texPos) & (TEXTURE_HEIGHT - 1);
+            texPos += step;
+
+            u_int32_t buffer_color = texture[TEXTURE_HEIGHT * tex_y + tex_x];
+
+            if (wall_side == WallSide::horizontal)
+                buffer_color = (buffer_color >> 1) & 8355711;
+
+            Color color = { static_cast<unsigned char>((buffer_color >> 16) & 0xFF),
+                            static_cast<unsigned char>((buffer_color >> 8) & 0xFF),
+                            static_cast<unsigned char>(buffer_color & 0xFF),
+                            255 };
+            screenPixels[y * SCREEN_WIDTH + line_x] = color;
+
+        } else {
+            screenPixels[y * SCREEN_WIDTH + line_x] = FLOOR_COLOR;
+        }
     }
-
-    DrawLine(line_x, 0, line_x, drawStart, CEILING_COLOR);
-    DrawLine(line_x, drawStart, line_x, drawEnd, color);
-    DrawLine(line_x, drawEnd, line_x, SCREEN_HEIGHT, FLOOR_COLOR);
 }

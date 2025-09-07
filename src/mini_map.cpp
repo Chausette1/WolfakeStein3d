@@ -13,12 +13,6 @@ MiniMap::MiniMap(Player *player, map_t &map) {
     this->map = &map;
 }
 
-MiniMap::~MiniMap() {
-    this->player = nullptr;
-    this->map = nullptr;
-    delete this;
-}
-
 void MiniMap::draw() {
     int x_win = 0, y_win = 0; // cursor in windows to draw
 
@@ -56,19 +50,19 @@ void MiniMap::draw() {
                     draw_rectangle(x_win, y_win, BLACK);
                     break;
                 case MapTile::Wall:
-                    draw_rectangle(x_win, y_win, RED);
+                    draw_rectangle(x_win, y_win, WALL1_COLOR);
                     break;
                 case MapTile::Wall2:
-                    draw_rectangle(x_win, y_win, GREEN);
+                    draw_rectangle(x_win, y_win, WALL2_COLOR);
                     break;
                 case MapTile::Wall3:
-                    draw_rectangle(x_win, y_win, BLUE);
+                    draw_rectangle(x_win, y_win, WALL3_COLOR);
                     break;
                 case MapTile::Wall4:
-                    draw_rectangle(x_win, y_win, YELLOW);
+                    draw_rectangle(x_win, y_win, WALL4_COLOR);
                     break;
                 default:
-                    draw_rectangle(x_win, y_win, WHITE);
+                    throw std::runtime_error("Invalid map tile in mini map");
                     break;
                 }
             }
@@ -83,3 +77,10 @@ void MiniMap::draw() {
 }
 
 bool MiniMap::isInMap(int x, int y) { return ((x >= 0 && x < map->width) && (y >= 0 && y < map->height)); }
+
+void MiniMap::change_map(map_t &map) {
+    this->map = &map;
+    if (!this->player->load_map(map)) {
+        throw std::runtime_error("Failed to load player map");
+    }
+}
