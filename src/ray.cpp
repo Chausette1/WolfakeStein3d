@@ -76,13 +76,6 @@ MyRay::cast(const Player& player, const map_t& map, Vector2 ray_dir)
 
     wall_x -= floor((wall_x));
 
-    tex_x = static_cast<int>(wall_x * TEXTURE_WIDTH);
-
-    if ((wall_side == WallSide::vertical && ray_dir.x > 0) ||
-        (wall_side == WallSide::horizontal && ray_dir.y < 0)) {
-        tex_x = TEXTURE_WIDTH - tex_x - 1;
-    }
-
     switch (wall_type) {
         case MapTile::Wall:
             tex_num = 0;
@@ -124,6 +117,15 @@ MyRay::draw_line(int line_x,
         return;
     }
 
+    int texture_width = texture_manager->get_texture_width(tex_num);
+
+    tex_x = static_cast<int>(wall_x * texture_width);
+
+    if ((wall_side == WallSide::vertical && ray_dir.x > 0) ||
+        (wall_side == WallSide::horizontal && ray_dir.y < 0)) {
+        tex_x = texture_width - tex_x - 1;
+    }
+
     float line_height = SCREEN_HEIGHT / distance;
 
     int drawStart = -line_height * VISION_SCALE + SCREEN_HEIGHT / 2;
@@ -133,29 +135,28 @@ MyRay::draw_line(int line_x,
     if (drawEnd >= SCREEN_HEIGHT)
         drawEnd = SCREEN_HEIGHT - 1;
 
-    double step = 1.0 * TEXTURE_HEIGHT / line_height;
+    double step = 1.0 * texture_width / line_height;
 
     double texPos = (drawStart - SCREEN_HEIGHT / 2 + line_height * VISION_SCALE) * step;
 
-    std::vector<u_int32_t> texture = texture_manager->get_texture(tex_num);
+    Color* texture = texture_manager->get_texture(tex_num);
 
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
         if (y < drawStart) {
             screenPixels[y * SCREEN_WIDTH + line_x] = CEILING_COLOR;
         } else if (y >= drawStart && y <= drawEnd) {
 
-            int tex_y = static_cast<int>(texPos) & (TEXTURE_HEIGHT - 1);
+            int tex_y = static_cast<int>(texPos) & (texture_width - 1);
             texPos += step;
 
-            u_int32_t buffer_color = texture[TEXTURE_HEIGHT * tex_y + tex_x];
+            Color color = texture[texture_width * tex_y + tex_x];
 
-            if (wall_side == WallSide::horizontal)
-                buffer_color = (buffer_color >> 1) & 8355711;
+            if (wall_side == WallSide::horizontal) {
+                color.r = (color.r >> 1) & 127;
+                color.g = (color.g >> 1) & 127;
+                color.b = (color.b >> 1) & 127;
+            }
 
-            Color color = { static_cast<unsigned char>((buffer_color >> 16) & 0xFF),
-                            static_cast<unsigned char>((buffer_color >> 8) & 0xFF),
-                            static_cast<unsigned char>(buffer_color & 0xFF),
-                            255 };
             screenPixels[y * SCREEN_WIDTH + line_x] = color;
 
         } else {

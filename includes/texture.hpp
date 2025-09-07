@@ -8,31 +8,16 @@ class TextureManager
     TextureManager();
     ~TextureManager();
 
-    std::vector<u_int32_t> get_texture(int index) { return texture[index]; }
+    Color* get_texture(int index) { return texture[index]; }
+    int get_texture_width(int index) { return texture_width[index]; }
+    int get_texture_height(int index) { return texture_height[index]; }
 
     void load_textures();
     void unload_textures();
 
-    // Texture2D get_wall1_v_texture() const;
-    // Texture2D get_wall1_h_texture() const;
-    // Texture2D get_wall2_v_texture() const;
-    // Texture2D get_wall2_h_texture() const;
-    // Texture2D get_wall3_v_texture() const;
-    // Texture2D get_wall3_h_texture() const;
-    // Texture2D get_wall4_v_texture() const;
-    // Texture2D get_wall4_h_texture() const;
-
   private:
-    // Texture2D wall1_v_texture;
-    // Texture2D wall1_h_texture;
-    // Texture2D wall2_v_texture;
-    // Texture2D wall2_h_texture;
-    // Texture2D wall3_v_texture;
-    // Texture2D wall3_h_texture;
-    // Texture2D wall4_v_texture;
-    // Texture2D wall4_h_texture;
-    const int texWidth = TEXTURE_WIDTH;
-    const int texHeight = TEXTURE_HEIGHT;
+    std::array<Color*, TEXTURE_NUM> texture;
 
-    std::array<std::vector<u_int32_t>, 4> texture;
+    std::array<int, TEXTURE_NUM> texture_width;
+    std::array<int, TEXTURE_NUM> texture_height;
 };

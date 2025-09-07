@@ -58,8 +58,7 @@ constexpr Color WALL2_COLOR = GREEN;
 constexpr Color WALL3_COLOR = BLUE;
 constexpr Color WALL4_COLOR = YELLOW;
 
-constexpr int TEXTURE_WIDTH = 64;
-constexpr int TEXTURE_HEIGHT = 64;
+constexpr int TEXTURE_NUM = 4;
 
 constexpr const char* MAPS[] = { "./maps/1.ray", "./maps/2.ray", "./maps/3.ray",
                                  "./maps/4.ray", "./maps/5.ray", "./maps/6.ray",
