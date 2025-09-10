@@ -3,16 +3,17 @@
 #include "include.hpp"
 #include "player.hpp"
 
-class MiniMap {
+class MiniMap
+{
   public:
-    MiniMap(Player *player, map_t &map);
+    MiniMap(Player* player, map_t& map);
 
-    void change_map(map_t &map);
+    void change_map(map_t& map);
 
     void draw();
 
   private:
-    Player *player;
-    map_t *map;
+    Player* player;
+    map_t* map;
     bool isInMap(int x, int y);
 };

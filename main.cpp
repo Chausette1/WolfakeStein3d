@@ -2,16 +2,21 @@
 #include "./includes/map_reader.hpp"
 #include "./includes/mini_map.hpp"
 #include "./includes/player.hpp"
+#include "./includes/sprite_manager.hpp"
 #include "./includes/texture.hpp"
 
 void
 update(Player* player);
+
 void
-draw(MiniMap* mini_map,
-     Player* player,
-     std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixels,
-     Texture2D& screenTex,
-     TextureManager* texture_manager);
+render(Player* player,
+       std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixels,
+       Texture2D& screenTex,
+       TextureManager* texture_manager);
+
+void
+draw(MiniMap* mini_map, Texture2D& screenTex);
+
 int
 load_map(std::string path, map_t& map);
 
@@ -31,9 +36,13 @@ main(void)
     map_t map;
     load_map(MAPS[map_index], map);
 
-    Player* player = new Player(map);
+    std::array<float, SCREEN_WIDTH>* zBuffer = new std::array<float, SCREEN_WIDTH>();
+
+    Player* player = new Player(map, zBuffer);
+
     MiniMap* mini_map = new MiniMap(player, map);
     TextureManager* textureManager = new TextureManager();
+    SpriteManager* spriteManager = new SpriteManager(&map, zBuffer);
 
     SetTraceLogLevel(LOG_NONE);
 
@@ -46,7 +55,16 @@ main(void)
     UnloadImage(frameBuffer);
     std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT> screenPixels;
 
+    InitAudioDevice();
+    SetMasterVolume(65.0f / 100.0f);
+
+    Sound sound = LoadSound(MUSIC);
+    PlaySound(sound);
+
     while (!WindowShouldClose()) {
+        if (IsSoundPlaying(sound) == false) {
+            PlaySound(sound);
+        }
         if (load_new_map) {
             load_map(MAPS[map_index], map);
             mini_map->change_map(map);
@@ -55,16 +73,23 @@ main(void)
 
         if (frame_count % ACTION_KEY_DELAY == 0) {
             update(player);
+            render(player, screenPixels, screenTex, textureManager);
+            spriteManager->render_sprites(player, screenPixels, textureManager, screenTex);
         }
-        draw(mini_map, player, screenPixels, screenTex, textureManager);
+        draw(mini_map, screenTex);
 
         frame_count++;
     }
 
+    StopSound(sound);
+
+    UnloadTexture(screenTex);
+    UnloadSound(sound);
     CloseWindow();
 
     delete mini_map;
     delete player;
+    delete textureManager;
 
     return 0;
 }
@@ -106,11 +131,17 @@ update(Player* player)
 }
 
 void
-draw(MiniMap* mini_map,
-     Player* player,
-     std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixels,
-     Texture2D& screenTex,
-     TextureManager* texture_manager)
+render(Player* player,
+       std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixels,
+       Texture2D& screenTex,
+       TextureManager* texture_manager)
+{
+    player->draw_vision(screenPixels, texture_manager);
+    UpdateTexture(screenTex, screenPixels.data());
+}
+
+void
+draw(MiniMap* mini_map, Texture2D& screenTex)
 {
     BeginDrawing();
 
@@ -119,8 +150,6 @@ draw(MiniMap* mini_map,
     if (mini_map_enabled) {
         mini_map->draw();
     } else {
-        player->draw_vision(screenPixels, texture_manager);
-        UpdateTexture(screenTex, screenPixels.data());
         DrawTexture(screenTex, 0, 0, WHITE);
     }
 

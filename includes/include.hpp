@@ -4,6 +4,7 @@
 Include all necessary headers for the raycaster
 */
 
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -52,20 +53,41 @@ ROTATE_MAT_2D(float angle, Vector2 vec)
 */
 
 constexpr Color FLOOR_COLOR = GRAY;
-constexpr Color CEILING_COLOR = DARKGRAY;
+constexpr Color CEILING_COLOR = SKYBLUE;
 constexpr Color WALL1_COLOR = RED;
 constexpr Color WALL2_COLOR = GREEN;
 constexpr Color WALL3_COLOR = BLUE;
 constexpr Color WALL4_COLOR = YELLOW;
-
-constexpr int TEXTURE_NUM = 4;
+constexpr Color WALL5_COLOR = MAGENTA;
+constexpr Color WALL6_COLOR = SKYBLUE;
+constexpr Color WALL7_COLOR = ORANGE;
+constexpr Color WALL8_COLOR = PURPLE;
 
 constexpr const char* MAPS[] = { "./maps/1.ray", "./maps/2.ray", "./maps/3.ray",
                                  "./maps/4.ray", "./maps/5.ray", "./maps/6.ray",
                                  "./maps/7.ray", "./maps/8.ray", "./maps/9.ray" };
-
 constexpr const int MAP_CONT = sizeof(MAPS) / sizeof(MAPS[0]);
+
+constexpr const char* WALL_TEXTURES[] = {
+    "./assets/textures/wall1.png", "./assets/textures/wall2.png", "./assets/textures/wall3.png",
+    "./assets/textures/wall4.png", "./assets/textures/wall5.png", "./assets/textures/wall6.png",
+    "./assets/textures/wall7.png", "./assets/textures/wall8.png"
+};
+
+constexpr int SPRITE_WALL_NUM = sizeof(WALL_TEXTURES) / sizeof(WALL_TEXTURES[0]);
+
+constexpr const char* SPRITE_OBSTACLES[] = { "./assets/textures/obstacle1.png",
+                                             "./assets/textures/obstacle2.png" };
+
+constexpr int SPRITE_OBSTACLES_NUM = sizeof(SPRITE_OBSTACLES) / sizeof(SPRITE_OBSTACLES[0]);
+
+constexpr const char* SPRITE_ENEMY[] = { "./assets/textures/enemie1.png" };
+
+constexpr int SPRITE_ENEMY_NUM = sizeof(SPRITE_ENEMY) / sizeof(SPRITE_ENEMY[0]);
+
 inline float VISION_SCALE = 0.5f;
+
+constexpr const char* MUSIC = "./assets/sounds/music.wav";
 
 /*
     Define all value for the map
@@ -78,12 +100,16 @@ enum class MapTile
     Wall2 = 2,
     Wall3 = 3,
     Wall4 = 4,
-    Player_North = 5,
-    Player_South = 6,
-    Player_West = 7,
-    Player_East = 8,
-    Ignore = 9,
-    Error = 10
+    Wall5 = 5,
+    Wall6 = 6,
+    Wall7 = 7,
+    Wall8 = 8,
+    Player_North = 9,
+    Player_South = 10,
+    Player_West = 11,
+    Player_East = 12,
+    Ignore = 13,
+    Error = 14
 };
 
 enum class WallSide
@@ -97,9 +123,14 @@ enum class WallSide
 */
 constexpr int PLAYER_FOV = 69;
 constexpr int PLAYER_STEP = 10;
-constexpr float PLAYER_ROT_STEP = 5.0f * (3.14159265358979323846f / 180.0f);
 constexpr int PLAYER_SIZE_ON_MINI_MAP = 8;
 constexpr int PLAYER_HITBOX_SIZE = 10;
+constexpr int LIFE_POINTS = 100;
+
+/*
+    Define all enemie constants for the raycaster
+*/
+constexpr float ENEMIE_STEP = 0.1f;
 
 /*
     Define constant about mini-map
@@ -108,8 +139,27 @@ constexpr int PLAYER_HITBOX_SIZE = 10;
 constexpr int MINI_MAP_TILE_SIZE = 64;
 
 /*
+    Define sprite types
+*/
+
+enum class SpriteType
+{
+    Enemy,
+    Item,
+    Obstacle1,
+    Obstacle2,
+};
+
+/*
     Define all structs for the raycaster
 */
+
+typedef struct sprite
+{
+    Vector2 position;
+    SpriteType type;
+    bool visible;
+} sprite_t;
 
 typedef struct map
 {
@@ -117,4 +167,5 @@ typedef struct map
     int height;
     std::vector<std::vector<MapTile>> data;
     std::string name;
+    std::vector<sprite_t*> sprites;
 } map_t;

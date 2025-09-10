@@ -3,17 +3,19 @@
 #include "player.hpp"
 #include "texture.hpp"
 
-MyRay::MyRay()
+MyRay::MyRay(std::array<float, SCREEN_WIDTH>* zBuffer)
 {
     distance = 0.0f;
     wall_side = WallSide::none;
     wall_type = MapTile::Empty;
     is_cast = false;
+    this->zBuffer = zBuffer;
 }
 
 void
 MyRay::cast(const Player& player, const map_t& map, Vector2 ray_dir)
 {
+    this->zBuffer = zBuffer;
     is_cast = false;
 
     this->ray_dir = ray_dir;
@@ -89,6 +91,18 @@ MyRay::cast(const Player& player, const map_t& map, Vector2 ray_dir)
         case MapTile::Wall4:
             tex_num = 3;
             break;
+        case MapTile::Wall5:
+            tex_num = 4;
+            break;
+        case MapTile::Wall6:
+            tex_num = 5;
+            break;
+        case MapTile::Wall7:
+            tex_num = 6;
+            break;
+        case MapTile::Wall8:
+            tex_num = 7;
+            break;
         default:
             throw std::runtime_error("Invalid wall type in ray casting");
     }
@@ -114,10 +128,12 @@ MyRay::draw_line(int line_x,
                  TextureManager* texture_manager)
 {
     if (!is_cast) {
-        return;
+        throw std::runtime_error("Ray not casted before drawing");
     }
 
-    int texture_width = texture_manager->get_texture_width(tex_num);
+    (*zBuffer)[line_x] = distance;
+
+    int texture_width = texture_manager->get_wall_texture_width(tex_num);
 
     tex_x = static_cast<int>(wall_x * texture_width);
 
@@ -139,7 +155,7 @@ MyRay::draw_line(int line_x,
 
     double texPos = (drawStart - SCREEN_HEIGHT / 2 + line_height * VISION_SCALE) * step;
 
-    Color* texture = texture_manager->get_texture(tex_num);
+    Color* texture = texture_manager->get_wall_textures(tex_num);
 
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
         if (y < drawStart) {
@@ -156,7 +172,6 @@ MyRay::draw_line(int line_x,
                 color.g = (color.g >> 1) & 127;
                 color.b = (color.b >> 1) & 127;
             }
-
             screenPixels[y * SCREEN_WIDTH + line_x] = color;
 
         } else {

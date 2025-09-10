@@ -35,9 +35,9 @@ canMoveAt(const int x, const int y, const map_t& map)
 
 } // namespace
 
-Player::Player(map_t& map)
+Player::Player(map_t& map, std::array<float, SCREEN_WIDTH>* zBuffer)
 {
-    load_map(map);
+    load_map(map, zBuffer);
 }
 
 Player::~Player()
@@ -112,7 +112,7 @@ Player::draw_vision(std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixel
 }
 
 bool
-Player::load_map(map_t& map)
+Player::load_map(map_t& map, std::array<float, SCREEN_WIDTH>* zBuffer)
 {
     int x, y;
     MapTile dir;
@@ -145,7 +145,7 @@ Player::load_map(map_t& map)
     player_plane = { player_dir.y * tan_buff, player_dir.x * tan_buff };
 
     for (int i = 0; i < SCREEN_WIDTH; i++) {
-        rays.push_back(new MyRay());
+        rays.push_back(new MyRay(zBuffer));
     }
     this->castRays();
     return true;

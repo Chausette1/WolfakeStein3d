@@ -2,10 +2,15 @@
 
 namespace {
 
-void draw_rectangle(int x, int y, Color color) { DrawRectangle(x, y, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE, color); }
+void
+draw_rectangle(int x, int y, Color color)
+{
+    DrawRectangle(x, y, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE, color);
+}
 } // namespace
 
-MiniMap::MiniMap(Player *player, map_t &map) {
+MiniMap::MiniMap(Player* player, map_t& map)
+{
     if (player == nullptr) {
         throw std::runtime_error("Player is null");
     }
@@ -13,7 +18,9 @@ MiniMap::MiniMap(Player *player, map_t &map) {
     this->map = &map;
 }
 
-void MiniMap::draw() {
+void
+MiniMap::draw()
+{
     int x_win = 0, y_win = 0; // cursor in windows to draw
 
     int x = player->get_x() - (SCREEN_WIDTH / 2); // minimap x/y
@@ -46,24 +53,36 @@ void MiniMap::draw() {
             if (isInMap(tile_x, tile_y)) {
                 // print x/y
                 switch (map->data[tile_y][tile_x]) {
-                case MapTile::Empty:
-                    draw_rectangle(x_win, y_win, BLACK);
-                    break;
-                case MapTile::Wall:
-                    draw_rectangle(x_win, y_win, WALL1_COLOR);
-                    break;
-                case MapTile::Wall2:
-                    draw_rectangle(x_win, y_win, WALL2_COLOR);
-                    break;
-                case MapTile::Wall3:
-                    draw_rectangle(x_win, y_win, WALL3_COLOR);
-                    break;
-                case MapTile::Wall4:
-                    draw_rectangle(x_win, y_win, WALL4_COLOR);
-                    break;
-                default:
-                    throw std::runtime_error("Invalid map tile in mini map");
-                    break;
+                    case MapTile::Empty:
+                        draw_rectangle(x_win, y_win, BLACK);
+                        break;
+                    case MapTile::Wall:
+                        draw_rectangle(x_win, y_win, WALL1_COLOR);
+                        break;
+                    case MapTile::Wall2:
+                        draw_rectangle(x_win, y_win, WALL2_COLOR);
+                        break;
+                    case MapTile::Wall3:
+                        draw_rectangle(x_win, y_win, WALL3_COLOR);
+                        break;
+                    case MapTile::Wall4:
+                        draw_rectangle(x_win, y_win, WALL4_COLOR);
+                        break;
+                    case MapTile::Wall5:
+                        draw_rectangle(x_win, y_win, WALL5_COLOR);
+                        break;
+                    case MapTile::Wall6:
+                        draw_rectangle(x_win, y_win, WALL6_COLOR);
+                        break;
+                    case MapTile::Wall7:
+                        draw_rectangle(x_win, y_win, WALL7_COLOR);
+                        break;
+                    case MapTile::Wall8:
+                        draw_rectangle(x_win, y_win, WALL8_COLOR);
+                        break;
+                    default:
+                        throw std::runtime_error("Invalid map tile in mini map");
+                        break;
                 }
             }
             x += MINI_MAP_TILE_SIZE;
@@ -76,11 +95,17 @@ void MiniMap::draw() {
     player->draw();
 }
 
-bool MiniMap::isInMap(int x, int y) { return ((x >= 0 && x < map->width) && (y >= 0 && y < map->height)); }
+bool
+MiniMap::isInMap(int x, int y)
+{
+    return ((x >= 0 && x < map->width) && (y >= 0 && y < map->height));
+}
 
-void MiniMap::change_map(map_t &map) {
+void
+MiniMap::change_map(map_t& map)
+{
     this->map = &map;
-    if (!this->player->load_map(map)) {
+    if (!this->player->load_map(map, this->player->get_buffer())) {
         throw std::runtime_error("Failed to load player map");
     }
 }

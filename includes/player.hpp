@@ -7,18 +7,21 @@
 class Player
 {
   public:
-    Player(map_t& map);
+    Player(map_t& map, std::array<float, SCREEN_WIDTH>* zBuffer);
     ~Player();
 
-    bool load_map(map_t& map);
+    bool load_map(map_t& map, std::array<float, SCREEN_WIDTH>* zBuffer);
 
     float get_x() const { return player_pos.x; }
     float get_y() const { return player_pos.y; }
+    std::array<float, SCREEN_WIDTH>* get_buffer() const { return zBuffer; }
+    Vector2 get_dir() const { return player_dir; }
+    Vector2 get_plane() const { return player_plane; }
 
     void move();
     void rotate(bool right);
 
-    void castRays(); // usable when one ray works
+    void castRays();
 
     void draw() const;
     void draw_vision(std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixels,
@@ -32,4 +35,5 @@ class Player
     Vector2 player_plane;
     map_t* map;
     std::vector<MyRay*> rays;
+    std::array<float, SCREEN_WIDTH>* zBuffer;
 };

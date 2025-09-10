@@ -15,10 +15,11 @@ class MyRay
     double wall_x;
     int tex_num;
     int tex_x;
+    std::array<float, SCREEN_WIDTH>* zBuffer;
 
   public:
-    MyRay();
-    void cast(const Player& player, const map_t& map, Vector2 ray_dir = { 0, 0 });
+    MyRay(std::array<float, SCREEN_WIDTH>* zBuffer);
+    void cast(const Player& player, const map_t& map, Vector2 ray_dir);
     void draw();
     void draw_line(int line_x,
                    std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixels,
