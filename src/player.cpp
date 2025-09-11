@@ -49,12 +49,16 @@ Player::~Player()
 }
 
 void
-Player::move()
+Player::move(bool forward)
 {
     // sin are inverted due to coordinate system
-
     int buffer_x = static_cast<int>(player_dir.x * player_speed);
     int buffer_y = static_cast<int>(-player_dir.y * player_speed);
+
+    if (!forward) {
+        buffer_x = -buffer_x;
+        buffer_y = -buffer_y;
+    }
 
     for (int j = -PLAYER_HITBOX_SIZE; j <= PLAYER_HITBOX_SIZE; j++) {
         for (int i = -PLAYER_HITBOX_SIZE; i <= PLAYER_HITBOX_SIZE; i++) {

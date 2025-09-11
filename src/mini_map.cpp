@@ -7,6 +7,26 @@ draw_rectangle(int x, int y, Color color)
 {
     DrawRectangle(x, y, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE, color);
 }
+
+void
+draw_enemies_on_map(map_t& map, float player_x, float player_y)
+{
+    for (const auto& sprite : map.sprites) {
+        if (sprite->type != SpriteType::Enemy) {
+            continue;
+        }
+        float enemy_x = sprite->position.x * MINI_MAP_TILE_SIZE;
+        float enemy_y = sprite->position.y * MINI_MAP_TILE_SIZE;
+
+        Vector2 buffer_coord = { enemy_x - player_x + (SCREEN_WIDTH / 2),
+                                 enemy_y - player_y + (SCREEN_HEIGHT / 2) };
+        if (buffer_coord.x >= 0 && buffer_coord.x < SCREEN_WIDTH && buffer_coord.y >= 0 &&
+            buffer_coord.y < SCREEN_HEIGHT) {
+            DrawRectangle(buffer_coord.x - 5, buffer_coord.y - 5, 10, 10, RED);
+        }
+    }
+}
+
 } // namespace
 
 MiniMap::MiniMap(Player* player, map_t& map)
@@ -93,6 +113,7 @@ MiniMap::draw()
     }
 
     player->draw();
+    draw_enemies_on_map(*map, player->get_x(), player->get_y());
 }
 
 bool

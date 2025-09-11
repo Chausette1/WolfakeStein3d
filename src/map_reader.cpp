@@ -32,8 +32,6 @@ get_tile_value(char c)
             return MapTile::Player_West;
         case 'E':
             return MapTile::Player_East;
-        case ' ':
-            return MapTile::Ignore;
         default:
             return MapTile::Error;
     }
@@ -69,12 +67,11 @@ map_reader::load_map(map_t& map, const std::string filename)
             std::vector<MapTile> row;
             for (char c : line) { // get the tile value from each character
                 width++;
-
-                MapTile buffer = static_cast<MapTile>(get_tile_value(c));
-                if (buffer == MapTile::Ignore) {
+                if (c == ' ') {
                     width--;
                     continue;
                 }
+                MapTile buffer = static_cast<MapTile>(get_tile_value(c));
                 if (buffer == MapTile::Error) {
                     std::cerr << "Error: Invalid character '" << c << "' in map file " << filename
                               << std::endl;

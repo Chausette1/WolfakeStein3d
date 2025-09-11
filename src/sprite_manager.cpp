@@ -6,10 +6,17 @@ sort_sprites(std::vector<int>& order, std::vector<float>& dist, std::size_t coun
 {
     std::vector<std::pair<float, int>> sprites(count);
     for (std::size_t i = 0; i < count; i++) {
-        sprites[i] = std::make_pair(dist[i], order[i]);
+        sprites[i].first = dist[i];
+        sprites[i].second = order[i];
     }
 
     std::sort(sprites.begin(), sprites.end());
+
+    std::reverse(sprites.begin(), sprites.end());
+    for (std::size_t i = 0; i < count; i++) {
+        order[i] = sprites[i].second;
+        dist[i] = sprites[i].first;
+    }
 }
 
 }
@@ -52,9 +59,10 @@ SpriteManager::render_sprites(Player* player,
         sprite_order[i] = i;
         sprite_distance[i] =
           ((player_pos_normed.x - sprite->position.x) * (player_pos_normed.x - sprite->position.x) +
-           ((player_pos_normed.y - sprite->position.y) *
-            (player_pos_normed.y - sprite->position.y)));
+           (((player_pos_normed.y - sprite->position.y) *
+             (player_pos_normed.y - sprite->position.y))));
     }
+
     sort_sprites(sprite_order, sprite_distance, sprite_count);
 
     for (std::size_t i = 0; i < sprite_count; i++) {
@@ -104,6 +112,11 @@ SpriteManager::render_sprites(Player* player,
                 spriteTexture = textureManager->get_obstacle_textures(1);
                 tex_width = textureManager->get_obstacle_texture_width(1);
                 tex_height = textureManager->get_obstacle_texture_height(1);
+                break;
+            case SpriteType::Enemy:
+                spriteTexture = textureManager->get_enemy_textures(0);
+                tex_width = textureManager->get_enemy_texture_width(0);
+                tex_height = textureManager->get_enemy_texture_height(0);
                 break;
             default:
                 throw std::runtime_error("Unknown sprite type");

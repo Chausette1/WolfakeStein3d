@@ -18,7 +18,7 @@ class Player
     Vector2 get_dir() const { return player_dir; }
     Vector2 get_plane() const { return player_plane; }
 
-    void move();
+    void move(bool forward);
     void rotate(bool right);
 
     void castRays();

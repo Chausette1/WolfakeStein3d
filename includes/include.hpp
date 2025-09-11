@@ -8,6 +8,9 @@ Include all necessary headers for the raycaster
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <random>
+#include <set>
 #include <vector>
 
 #include "raylib.h"
@@ -17,14 +20,14 @@ Include all necessary headers for the raycaster
     Define all constants for the windows
 */
 
-constexpr int SCREEN_WIDTH = 800;
+constexpr int SCREEN_WIDTH = 1280;
 constexpr float ASPECT_RATIO = 16.0f / 9.0f;
 constexpr int SCREEN_HEIGHT = static_cast<int>(SCREEN_WIDTH / ASPECT_RATIO);
 constexpr const char* SCREEN_NAME = "Raycaster";
 constexpr u_int8_t MAX_FPS = 60;
 constexpr int FPS_INDICATOR_X = 10;
 constexpr int FPS_INDICATOR_Y = 10;
-inline u_int8_t ACTION_KEY_DELAY = 4; // in frames
+constexpr u_int8_t ACTION_KEY_DELAY = 4; // in frames
 
 /*
 Define all math Constants for the raycaster
@@ -108,8 +111,7 @@ enum class MapTile
     Player_South = 10,
     Player_West = 11,
     Player_East = 12,
-    Ignore = 13,
-    Error = 14
+    Error = 13
 };
 
 enum class WallSide
@@ -123,14 +125,19 @@ enum class WallSide
 */
 constexpr int PLAYER_FOV = 69;
 constexpr int PLAYER_STEP = 10;
+constexpr float PLAYER_ROT_STEP = Deg2Rad(5.0f);
 constexpr int PLAYER_SIZE_ON_MINI_MAP = 8;
 constexpr int PLAYER_HITBOX_SIZE = 10;
-constexpr int LIFE_POINTS = 100;
+constexpr int PLAYER_LIFE = 100;
+inline int PLAYER_DAMAGE = 10;
 
 /*
     Define all enemie constants for the raycaster
 */
-constexpr float ENEMIE_STEP = 0.1f;
+constexpr float ENEMIE_STEP = 0.05f;
+inline int ENEMIE_LIFE = 5;
+inline int ENEMIE_DAMAGE = 8;
+inline int ENEMIE_NUMBER = 0;
 
 /*
     Define constant about mini-map
@@ -159,6 +166,7 @@ typedef struct sprite
     Vector2 position;
     SpriteType type;
     bool visible;
+    int id = -1;
 } sprite_t;
 
 typedef struct map
@@ -169,3 +177,15 @@ typedef struct map
     std::string name;
     std::vector<sprite_t*> sprites;
 } map_t;
+
+/*
+    surcharge < operator for Vector2 to use it in std::map
+*/
+
+inline bool
+operator<(const Vector2& a, const Vector2& b)
+{
+    if (a.x == b.x)
+        return a.y < b.y;
+    return a.x < b.x;
+}
