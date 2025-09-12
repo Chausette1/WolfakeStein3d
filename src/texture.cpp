@@ -14,7 +14,6 @@ TextureManager::~TextureManager()
 void
 TextureManager::load_textures()
 {
-    SetTraceLogLevel(LOG_NONE);
     for (int i = 0; i < SPRITE_WALL_NUM; i++) {
         Image wall = LoadImage(WALL_TEXTURES[i]);
 
@@ -53,6 +52,14 @@ TextureManager::load_textures()
             UnloadImage(enemy);
         }
     }
+
+    Image sword_texture = LoadImage(SWORD_SPRITE);
+    if (!IsImageValid(sword_texture)) {
+        std::cerr << "Failed to load sword texture" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    this->sword_texture = LoadTextureFromImage(sword_texture);
+    UnloadImage(sword_texture);
 }
 
 void
@@ -67,4 +74,5 @@ TextureManager::unload_textures()
     for (auto& tex : enemies_texture) {
         UnloadImageColors(tex);
     }
+    UnloadTexture(sword_texture);
 }

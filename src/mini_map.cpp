@@ -71,38 +71,15 @@ MiniMap::draw()
             int tile_x = x / MINI_MAP_TILE_SIZE;
 
             if (isInMap(tile_x, tile_y)) {
-                // print x/y
-                switch (map->data[tile_y][tile_x]) {
-                    case MapTile::Empty:
-                        draw_rectangle(x_win, y_win, BLACK);
-                        break;
-                    case MapTile::Wall:
-                        draw_rectangle(x_win, y_win, WALL1_COLOR);
-                        break;
-                    case MapTile::Wall2:
-                        draw_rectangle(x_win, y_win, WALL2_COLOR);
-                        break;
-                    case MapTile::Wall3:
-                        draw_rectangle(x_win, y_win, WALL3_COLOR);
-                        break;
-                    case MapTile::Wall4:
-                        draw_rectangle(x_win, y_win, WALL4_COLOR);
-                        break;
-                    case MapTile::Wall5:
-                        draw_rectangle(x_win, y_win, WALL5_COLOR);
-                        break;
-                    case MapTile::Wall6:
-                        draw_rectangle(x_win, y_win, WALL6_COLOR);
-                        break;
-                    case MapTile::Wall7:
-                        draw_rectangle(x_win, y_win, WALL7_COLOR);
-                        break;
-                    case MapTile::Wall8:
-                        draw_rectangle(x_win, y_win, WALL8_COLOR);
-                        break;
-                    default:
-                        throw std::runtime_error("Invalid map tile in mini map");
-                        break;
+                if (map->data[tile_y][tile_x] == MapTile::Wall ||
+                    map->data[tile_y][tile_x] == MapTile::Wall2 ||
+                    map->data[tile_y][tile_x] == MapTile::Wall3 ||
+                    map->data[tile_y][tile_x] == MapTile::Wall4 ||
+                    map->data[tile_y][tile_x] == MapTile::Wall5 ||
+                    map->data[tile_y][tile_x] == MapTile::Wall6 ||
+                    map->data[tile_y][tile_x] == MapTile::Wall7 ||
+                    map->data[tile_y][tile_x] == MapTile::Wall8) {
+                    draw_rectangle(x_win, y_win, WALL_COLOR);
                 }
             }
             x += MINI_MAP_TILE_SIZE;

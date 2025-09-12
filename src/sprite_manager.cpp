@@ -101,6 +101,7 @@ SpriteManager::render_sprites(Player* player,
         Color* spriteTexture;
         int tex_width;
         int tex_height;
+        int textureID = this->map->sprites[sprite_order[i]]->texture_id;
         switch (type) {
             case SpriteType::Obstacle1:
                 spriteTexture = textureManager->get_obstacle_textures(0);
@@ -114,9 +115,9 @@ SpriteManager::render_sprites(Player* player,
                 tex_height = textureManager->get_obstacle_texture_height(1);
                 break;
             case SpriteType::Enemy:
-                spriteTexture = textureManager->get_enemy_textures(0);
-                tex_width = textureManager->get_enemy_texture_width(0);
-                tex_height = textureManager->get_enemy_texture_height(0);
+                spriteTexture = textureManager->get_enemy_textures(textureID);
+                tex_width = textureManager->get_enemy_texture_width(textureID);
+                tex_height = textureManager->get_enemy_texture_height(textureID);
                 break;
             default:
                 throw std::runtime_error("Unknown sprite type");
@@ -135,7 +136,7 @@ SpriteManager::render_sprites(Player* player,
                 int texY = ((d * tex_height) / spriteHeight) / 256;
 
                 Color x_y_color = spriteTexture[texY * tex_width + texX];
-                if (x_y_color.r == BLACK.r && x_y_color.g == BLACK.g && x_y_color.b == BLACK.b)
+                if (x_y_color.r == 255 && x_y_color.g == 0 && x_y_color.b == 255)
                     continue;
 
                 screenPixels[y * SCREEN_WIDTH + stripe] = x_y_color;

@@ -69,7 +69,7 @@ Enemie::Enemie(Vector2 pos, int texture_id, map_t& map, int id, Vector2 player_p
   : map(&map)
   , speed(ENEMIE_STEP)
   , position(pos)
-  , textureID(texture_id)
+  , texture_id(texture_id)
   , id(id)
 {
     this->map->sprites.push_back(new sprite_t{ pos, SpriteType::Enemy, true, id });
@@ -78,6 +78,8 @@ Enemie::Enemie(Vector2 pos, int texture_id, map_t& map, int id, Vector2 player_p
 
     last_distance_to_player =
       sqrt(pow(player_pos.x - position.x, 2) + pow(player_pos.y - position.y, 2));
+
+    this->update_texture_in_map();
 };
 
 Enemie::~Enemie()
@@ -96,6 +98,7 @@ Enemie::update_texture_in_map()
         for (auto& sprite : this->map->sprites) {
             if (sprite->id == this->id) {
                 sprite->position = this->position;
+                sprite->texture_id = this->texture_id;
                 break;
             }
         }
@@ -162,9 +165,63 @@ Enemie::move_toward_player(Player* player, map_t& map)
     this->update_texture_in_map();
 }
 
+bool
+Enemie::can_attack(Player* player) const
+{
+    Vector2 player_pos = { player->get_x() / MINI_MAP_TILE_SIZE,
+                           player->get_y() / MINI_MAP_TILE_SIZE };
+
+    float distance_to_player =
+      sqrt(pow(player_pos.x - this->position.x, 2) + pow(player_pos.y - this->position.y, 2));
+
+    return distance_to_player < 0.7f && !this->attacking;
+}
+
+void
+Enemie::attack()
+{
+    this->attacking = true;
+    this->attack_tick = 0;
+}
+
+bool
+Enemie::is_attacking() const
+{
+    return this->attacking;
+}
+
+void
+Enemie::update_attack_animation(Player* player)
+{
+    if (this->enemie_life <= 0) {
+        return;
+    }
+    switch (attack_tick) {
+        case 1:
+            this->texture_id = 1;
+            this->update_texture_in_map();
+            break;
+        case 6:
+            player->take_damage(this->enemie_damage);
+            break;
+        case 13:
+            this->attacking = false;
+            this->texture_id = 0;
+            this->attack_tick = 0;
+            this->update_texture_in_map();
+            return;
+        default:
+            break;
+    }
+    this->attack_tick++;
+}
+
 void
 Enemie::take_damage(int damage)
 {
+    if (this->enemie_life <= 0) {
+        return;
+    }
     this->enemie_life -= damage;
     if (this->enemie_life <= 0) {
         for (auto it = this->map->sprites.begin(); it != this->map->sprites.end(); ++it) {

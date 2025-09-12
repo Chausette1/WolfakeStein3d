@@ -20,6 +20,8 @@ class TextureManager
     int get_enemy_texture_width(int index) { return enemies_texture_width[index]; }
     int get_enemy_texture_height(int index) { return enemies_texture_height[index]; }
 
+    Texture2D get_sword_texture() { return sword_texture; }
+
     void load_textures();
     void unload_textures();
 
@@ -38,4 +40,6 @@ class TextureManager
 
     std::array<int, SPRITE_ENEMY_NUM> enemies_texture_width;
     std::array<int, SPRITE_ENEMY_NUM> enemies_texture_height;
+
+    Texture2D sword_texture;
 };

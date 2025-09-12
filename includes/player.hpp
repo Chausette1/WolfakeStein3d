@@ -4,6 +4,8 @@
 #include "ray.hpp"
 #include "texture.hpp"
 
+class Enemie;
+
 class Player
 {
   public:
@@ -17,15 +19,27 @@ class Player
     std::array<float, SCREEN_WIDTH>* get_buffer() const { return zBuffer; }
     Vector2 get_dir() const { return player_dir; }
     Vector2 get_plane() const { return player_plane; }
+    int get_life() const { return life; }
 
     void move(bool forward);
     void rotate(bool right);
 
+    void take_damage(int damage) { life -= damage; }
+    void heal(int heal) { life += heal; }
+    void upgrade_damage(int amount) { damage += amount; }
+
+    bool can_attack(const Enemie* enemy) const;
+    void attack(Enemie* enemy);
+    bool is_attacking() const;
+    float get_attack_animation(Enemie* enemy);
+
     void castRays();
 
     void draw() const;
-    void draw_vision(std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixels,
-                     TextureManager* texture_manager) const;
+    void render_vision(std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT>& screenPixels,
+                       TextureManager* texture_manager) const;
+
+    void reset();
 
   private:
     Vector2 player_pos;
@@ -36,4 +50,9 @@ class Player
     map_t* map;
     std::vector<MyRay*> rays;
     std::array<float, SCREEN_WIDTH>* zBuffer;
+    int life = PLAYER_LIFE;
+    int damage = PLAYER_DAMAGE;
+    int texture_attack = 0;
+    int attack_tick = 0;
+    bool attacking = false;
 };

@@ -6,6 +6,7 @@ Include all necessary headers for the raycaster
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -28,6 +29,7 @@ constexpr u_int8_t MAX_FPS = 60;
 constexpr int FPS_INDICATOR_X = 10;
 constexpr int FPS_INDICATOR_Y = 10;
 constexpr u_int8_t ACTION_KEY_DELAY = 4; // in frames
+constexpr int HEALTH_BAR_WIDTH = 400;
 
 /*
 Define all math Constants for the raycaster
@@ -57,14 +59,7 @@ ROTATE_MAT_2D(float angle, Vector2 vec)
 
 constexpr Color FLOOR_COLOR = GRAY;
 constexpr Color CEILING_COLOR = SKYBLUE;
-constexpr Color WALL1_COLOR = RED;
-constexpr Color WALL2_COLOR = GREEN;
-constexpr Color WALL3_COLOR = BLUE;
-constexpr Color WALL4_COLOR = YELLOW;
-constexpr Color WALL5_COLOR = MAGENTA;
-constexpr Color WALL6_COLOR = SKYBLUE;
-constexpr Color WALL7_COLOR = ORANGE;
-constexpr Color WALL8_COLOR = PURPLE;
+constexpr Color WALL_COLOR = RED;
 
 constexpr const char* MAPS[] = { "./maps/1.ray", "./maps/2.ray", "./maps/3.ray",
                                  "./maps/4.ray", "./maps/5.ray", "./maps/6.ray",
@@ -84,13 +79,16 @@ constexpr const char* SPRITE_OBSTACLES[] = { "./assets/textures/obstacle1.png",
 
 constexpr int SPRITE_OBSTACLES_NUM = sizeof(SPRITE_OBSTACLES) / sizeof(SPRITE_OBSTACLES[0]);
 
-constexpr const char* SPRITE_ENEMY[] = { "./assets/textures/enemie1.png" };
+constexpr const char* SPRITE_ENEMY[] = { "./assets/textures/enemie1.png",
+                                         "./assets/textures/enemie2.png" };
 
 constexpr int SPRITE_ENEMY_NUM = sizeof(SPRITE_ENEMY) / sizeof(SPRITE_ENEMY[0]);
 
 inline float VISION_SCALE = 0.5f;
 
 constexpr const char* MUSIC = "./assets/sounds/music.wav";
+
+constexpr const char* SWORD_SPRITE = "./assets/textures/sword1.png";
 
 /*
     Define all value for the map
@@ -125,9 +123,9 @@ enum class WallSide
 */
 constexpr int PLAYER_FOV = 69;
 constexpr int PLAYER_STEP = 10;
-constexpr float PLAYER_ROT_STEP = Deg2Rad(5.0f);
+constexpr float PLAYER_ROT_STEP = Deg2Rad(10.0f);
 constexpr int PLAYER_SIZE_ON_MINI_MAP = 8;
-constexpr int PLAYER_HITBOX_SIZE = 10;
+constexpr int PLAYER_HITBOX_SIZE = 5;
 constexpr int PLAYER_LIFE = 100;
 inline int PLAYER_DAMAGE = 10;
 
@@ -136,7 +134,7 @@ inline int PLAYER_DAMAGE = 10;
 */
 constexpr float ENEMIE_STEP = 0.05f;
 inline int ENEMIE_LIFE = 5;
-inline int ENEMIE_DAMAGE = 8;
+inline int ENEMIE_DAMAGE = 4;
 inline int ENEMIE_NUMBER = 0;
 
 /*
@@ -167,6 +165,7 @@ typedef struct sprite
     SpriteType type;
     bool visible;
     int id = -1;
+    int texture_id = -1;
 } sprite_t;
 
 typedef struct map

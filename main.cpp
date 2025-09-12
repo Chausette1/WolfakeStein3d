@@ -7,7 +7,7 @@
 #include "./includes/texture.hpp"
 
 void
-update(Player* player);
+update(Player* player, std::vector<Enemie*>& enemies, map_t& map, MiniMap* mini_map);
 
 void
 render(Player* player,
@@ -16,7 +16,11 @@ render(Player* player,
        TextureManager* texture_manager);
 
 void
-draw(MiniMap* mini_map, Texture2D& screenTex);
+draw(MiniMap* mini_map,
+     Texture2D& screenTex,
+     Player* player,
+     TextureManager* texture_manager,
+     std::vector<Enemie*> enemies);
 
 int
 load_map(std::string path, map_t& map);
@@ -24,14 +28,22 @@ load_map(std::string path, map_t& map);
 Vector2
 get_random_empty_position(map_t& map);
 
+void
+draw_health_bar(Player* player);
+
+void
+draw_sword(TextureManager* texture_manager, float rotation);
+
+void
+draw_wave();
+
+void
+reset_game(Player* player, std::vector<Enemie*>* enemies, map_t* map, MiniMap* mini_map);
+
 static bool mini_map_enabled = false;
-static int frame_count = 0;
 
 static bool lock_tab = false;
-static bool lock_up = false;
-static bool lock_down = false;
 
-static bool load_new_map = false;
 static int map_index = 0;
 
 int wave_count = 0;
@@ -40,6 +52,15 @@ bool wave_in_progress = false;
 int
 main(void)
 {
+    SetTraceLogLevel(LOG_NONE);
+
+    std::random_device rd;
+    unsigned int seed = rd();
+
+    SetRandomSeed(seed);
+    SetTargetFPS(MAX_FPS);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_NAME);
+
     map_t map;
     load_map(MAPS[map_index], map);
 
@@ -52,16 +73,8 @@ main(void)
     SpriteManager* spriteManager = new SpriteManager(&map, zBuffer);
     std::vector<Enemie*> enemies;
 
-    SetTraceLogLevel(LOG_NONE);
-
-    std::random_device rd;
-    unsigned int seed = rd();
-
-    SetRandomSeed(seed);
-
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_NAME);
-
-    SetTargetFPS(MAX_FPS);
+    auto current_time = std::chrono::high_resolution_clock::now();
+    auto old_time = current_time;
 
     Image frameBuffer = GenImageColor(SCREEN_WIDTH, SCREEN_HEIGHT, BLACK);
     Texture2D screenTex = LoadTextureFromImage(frameBuffer);
@@ -69,7 +82,7 @@ main(void)
     std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT> screenPixels;
 
     InitAudioDevice();
-    SetMasterVolume(65.0f / 100.0f);
+    SetMasterVolume(0.65f);
 
     Sound sound = LoadSound(MUSIC);
     PlaySound(sound);
@@ -78,37 +91,36 @@ main(void)
         if (IsSoundPlaying(sound) == false) {
             PlaySound(sound);
         }
-        // if (load_new_map) {
-        //     load_map(MAPS[map_index], map);
-        //     mini_map->change_map(map);
-        //     load_new_map = false;
-        // }
 
-        if (frame_count % ACTION_KEY_DELAY == 0) {
+        current_time = std::chrono::high_resolution_clock::now();
+
+        auto elapsed =
+          std::chrono::duration_cast<std::chrono::milliseconds>(current_time - old_time).count();
+        if (elapsed > 66) { // ~15 actions per second
+            old_time = current_time;
             if (!wave_in_progress) {
-                ENEMIE_LIFE += 5;
-                ENEMIE_DAMAGE += 2;
-                wave_in_progress = true;
                 wave_count++;
-                ENEMIE_NUMBER = 5 + wave_count * 2;
+                if (wave_count % 3 == 0) {
+                    map_index = (map_index + 1) % (sizeof(MAPS) / sizeof(MAPS[0]));
+                    load_map(MAPS[map_index], map);
+                    mini_map->change_map(map);
+                }
+                ENEMIE_LIFE += 5;
+                ENEMIE_DAMAGE += 4;
+                wave_in_progress = true;
+                ENEMIE_NUMBER = 1 + wave_count * 2;
                 for (int i = 0; i < ENEMIE_NUMBER; i++) {
                     Vector2 pos = get_random_empty_position(map);
                     Vector2 player_pos = { player->get_x() / MINI_MAP_TILE_SIZE,
                                            player->get_y() / MINI_MAP_TILE_SIZE };
                     enemies.push_back(new Enemie(pos, 0, map, i, player_pos));
                 }
-            } else {
-                for (auto& enemie : enemies) {
-                    enemie->move_toward_player(player, map);
-                }
             }
-            update(player);
+            update(player, enemies, map, mini_map);
             render(player, screenPixels, screenTex, textureManager);
             spriteManager->render_sprites(player, screenPixels, textureManager, screenTex);
         }
-        draw(mini_map, screenTex);
-
-        frame_count++;
+        draw(mini_map, screenTex, player, textureManager, enemies);
     }
 
     StopSound(sound);
@@ -120,22 +132,45 @@ main(void)
     delete mini_map;
     delete player;
     delete textureManager;
+    delete spriteManager;
+    delete zBuffer;
+    for (auto& enemie : enemies) {
+        delete enemie;
+    }
+    enemies.clear();
 
     return 0;
 }
 
 void
-update(Player* player)
+update(Player* player, std::vector<Enemie*>& enemies, map_t& map, MiniMap* mini_map)
 {
+    if (player->get_life() <= 0) {
+        reset_game(player, &enemies, &map, mini_map);
+    }
+
+    for (auto it = enemies.begin(); it != enemies.end();) {
+        Enemie* enemie = *it;
+        if (enemie->get_life() <= 0) {
+            delete enemie;
+            it = enemies.erase(it);
+            continue;
+        }
+        if (enemie->is_attacking()) {
+            enemie->update_attack_animation(player);
+        }
+        enemie->move_toward_player(player, map);
+        if (enemie->can_attack(player)) {
+            enemie->attack();
+        }
+        ++it;
+    }
+    if (enemies.empty()) {
+        wave_in_progress = false;
+    }
 
     if (IsKeyUp(KEY_TAB) && lock_tab) {
         lock_tab = false;
-    }
-    if (IsKeyUp(KEY_UP) && lock_up) {
-        lock_up = false;
-    }
-    if (IsKeyUp(KEY_DOWN) && lock_down) {
-        lock_down = false;
     }
 
     if (IsKeyDown(KEY_A)) {
@@ -146,14 +181,12 @@ update(Player* player)
         player->move(true);
     } else if (IsKeyDown(KEY_S)) {
         player->move(false);
-    } else if (IsKeyDown(KEY_UP) && !lock_up) {
-        load_new_map = true;
-        map_index = (map_index + 1) % MAP_CONT;
-        lock_up = true;
-    } else if (IsKeyDown(KEY_DOWN) && !lock_down) {
-        load_new_map = true;
-        map_index = (map_index - 1 + MAP_CONT) % MAP_CONT;
-        lock_down = true;
+    } else if (IsKeyDown(KEY_SPACE)) {
+        for (auto& enemie : enemies) {
+            if (player->can_attack(enemie)) {
+                player->attack(enemie);
+            }
+        }
     }
 
     if (IsKeyDown(KEY_TAB) && !lock_tab) {
@@ -168,12 +201,16 @@ render(Player* player,
        Texture2D& screenTex,
        TextureManager* texture_manager)
 {
-    player->draw_vision(screenPixels, texture_manager);
+    player->render_vision(screenPixels, texture_manager);
     UpdateTexture(screenTex, screenPixels.data());
 }
 
 void
-draw(MiniMap* mini_map, Texture2D& screenTex)
+draw(MiniMap* mini_map,
+     Texture2D& screenTex,
+     Player* player,
+     TextureManager* texture_manager,
+     std::vector<Enemie*> enemies)
 {
     BeginDrawing();
 
@@ -183,7 +220,21 @@ draw(MiniMap* mini_map, Texture2D& screenTex)
         mini_map->draw();
     } else {
         DrawTexture(screenTex, 0, 0, WHITE);
+
+        float rotation = 0.0f;
+
+        for (auto& enemie : enemies) {
+            if (enemie->is_cibled()) {
+                rotation = player->get_attack_animation(enemie);
+                break;
+            }
+        }
+
+        draw_sword(texture_manager, rotation);
     }
+
+    draw_wave();
+    draw_health_bar(player);
 
     DrawRectangle(FPS_INDICATOR_X - 2, FPS_INDICATOR_Y - 2, 80, 22, BLACK);
     DrawFPS(FPS_INDICATOR_X, FPS_INDICATOR_Y);
@@ -209,4 +260,86 @@ get_random_empty_position(map_t& map)
         pos.y = GetRandomValue(0, map.height - 1);
     } while (map.data[pos.y][pos.x] != MapTile::Empty);
     return pos;
+}
+
+void
+draw_health_bar(Player* player)
+{
+    int bar_height = 20;
+    int x = (SCREEN_WIDTH - HEALTH_BAR_WIDTH) / 2;
+    int y = 10;
+
+    DrawRectangle(x - 2, y - 2, HEALTH_BAR_WIDTH + 4, bar_height + 4, BLACK);
+
+    float health_percentage = static_cast<float>(player->get_life()) / PLAYER_LIFE;
+    int health_bar_width = static_cast<int>(HEALTH_BAR_WIDTH * health_percentage);
+
+    Color health_color;
+    if (health_percentage > 0.5f) {
+        health_color = GREEN;
+    } else if (health_percentage > 0.2f) {
+        health_color = YELLOW;
+    } else {
+        health_color = RED;
+    }
+
+    DrawRectangle(x, y, health_bar_width, bar_height, health_color);
+    DrawRectangleLines(x, y, HEALTH_BAR_WIDTH, bar_height, WHITE);
+}
+
+void
+draw_sword(TextureManager* texture_manager, float rotation)
+{
+    int x = (SCREEN_WIDTH) * (3.0f / 4.0f);
+    int y = SCREEN_HEIGHT;
+
+    Texture2D sword_texture = texture_manager->get_sword_texture();
+
+    Rectangle source = { 0.0f,
+                         0.0f,
+                         -static_cast<float>(sword_texture.width),
+                         static_cast<float>(sword_texture.height) };
+
+    Rectangle dest = { static_cast<float>(x),
+                       static_cast<float>(y),
+                       static_cast<float>(sword_texture.width) * 4.0f,
+                       static_cast<float>(sword_texture.height) * 4.0f };
+
+    Vector2 origin = { dest.width, dest.height };
+
+    Color tint = WHITE;
+    DrawTexturePro(sword_texture, source, dest, origin, -rotation, tint);
+}
+
+void
+draw_wave()
+{
+    std::string wave_text = "Wave " + std::to_string(wave_count);
+    int font_size = 50;
+    int text_width = MeasureText(wave_text.c_str(), font_size);
+    // at the right up corner
+    int x = (SCREEN_WIDTH - (text_width * 1.3f));
+    int y = font_size / 2;
+
+    DrawText(wave_text.c_str(), x, y, font_size, BLACK);
+}
+
+void
+reset_game(Player* player, std::vector<Enemie*>* enemies, map_t* map, MiniMap* mini_map)
+{
+    player->reset();
+    for (auto& enemie : *enemies) {
+        delete enemie;
+    }
+    enemies->clear();
+    map_index = 0;
+    wave_count = 0;
+    wave_in_progress = false;
+    ENEMIE_LIFE = 5;
+    ENEMIE_DAMAGE = 4;
+    ENEMIE_NUMBER = 0;
+    load_map(MAPS[map_index], *map);
+    mini_map->change_map(*map);
+    mini_map_enabled = false;
+    lock_tab = false;
 }
